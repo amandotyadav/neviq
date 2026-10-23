@@ -5,8 +5,8 @@ import SwiftUI
 /// any size, from tab bars to the welcome screen.
 struct NaviqMark: View {
     var size: CGFloat = 32
-    var ink: Color = NaviqColor.ink
-    var accent: Color = NaviqColor.coral
+    var ink: Color = NaviqColor.forest
+    var accent: Color = NaviqColor.accent
 
     var body: some View {
         ZStack {
@@ -44,15 +44,15 @@ private struct NeedleShape: Shape {
 /// Wordmark: lowercase serif "naviq" paired with the mark.
 struct NaviqWordmark: View {
     var markSize: CGFloat = 26
-    var font: Font = .system(.title2, design: .rounded).weight(.semibold)
+    var font: Font = .system(size: 22, weight: .semibold, design: .serif)
 
     var body: some View {
         HStack(spacing: 8) {
             NaviqMark(size: markSize)
             Text("naviq")
                 .font(font)
-                .tracking(-0.5)
-                .foregroundStyle(NaviqColor.ink)
+                .tracking(-0.6)
+                .foregroundStyle(NaviqColor.forest)
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Naviq")

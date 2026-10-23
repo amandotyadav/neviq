@@ -35,20 +35,19 @@ struct EligibilityReportView: View {
     }
 
     private func overall(_ r: EligibilityResult) -> some View {
-        let (title, detail, color, symbol) = summary(r)
-        return HStack(alignment: .top, spacing: NaviqSpacing.m) {
-            Image(systemName: symbol).font(.title2).foregroundStyle(color)
-            VStack(alignment: .leading, spacing: 4) {
-                Text(title).font(NaviqFont.cardTitle).foregroundStyle(NaviqColor.ink)
-                Text(detail).font(.subheadline).foregroundStyle(NaviqColor.inkSecondary)
-                Text(countsLine(r))
-                    .font(.caption.monospacedDigit())
-                    .foregroundStyle(NaviqColor.inkTertiary)
-            }
+        let (title, detail, _, _) = summary(r)
+        return VStack(alignment: .leading, spacing: 10) {
+            EligibilityStamp(overall: r.overall)
+            Text(title).sectionTitleStyle().foregroundStyle(NaviqColor.ink).multilineTextAlignment(.leading)
+            Text(detail).font(.subheadline).foregroundStyle(NaviqColor.inkSecondary)
+            Text(countsLine(r))
+                .font(.caption.weight(.medium).monospacedDigit())
+                .foregroundStyle(NaviqColor.inkSecondary)
         }
-        .padding(NaviqSpacing.l)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background { RoundedRectangle(cornerRadius: 14).fill(color.opacity(0.12)) }
+        .padding(.vertical, 14)
+        .overlay(alignment: .top) { Hairline() }
+        .overlay(alignment: .bottom) { Hairline() }
         .accessibilityElement(children: .combine)
     }
 
@@ -85,7 +84,7 @@ struct EligibilityReportView: View {
                 HStack(alignment: .top, spacing: 10) {
                     statusIcon(c.status)
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(c.requirement).foregroundStyle(NaviqColor.ink).multilineTextAlignment(.leading)
+                        Text(c.requirement).font(.system(.body, design: .serif)).foregroundStyle(NaviqColor.ink).multilineTextAlignment(.leading)
                         HStack(spacing: 6) {
                             Text(statusText(c.status)).font(.caption.weight(.semibold)).foregroundStyle(statusColor(c.status))
                             if !c.mandatory { Text("· Optional").font(.caption).foregroundStyle(NaviqColor.inkTertiary) }
@@ -112,7 +111,7 @@ struct EligibilityReportView: View {
                     }
                     if let excerpt = c.sourceExcerpt {
                         Text("“\(excerpt)”")
-                            .font(.system(.footnote, design: .rounded).italic())
+                            .font(.system(.footnote, design: .serif).italic())
                             .foregroundStyle(NaviqColor.inkSecondary)
                             .padding(.leading, 10)
                             .overlay(alignment: .leading) { Rectangle().fill(NaviqColor.rule).frame(width: 2) }
@@ -142,11 +141,11 @@ struct EligibilityReportView: View {
         return Button { declare(key, value) } label: {
             Label(title, systemImage: selected ? "checkmark" : "circle")
                 .font(.subheadline.weight(selected ? .semibold : .regular))
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .foregroundStyle(selected ? NaviqColor.onAccent : NaviqColor.ink)
-                .background { Capsule().fill(selected ? tint : NaviqColor.surface) }
-                .overlay { Capsule().strokeBorder(selected ? Color.clear : NaviqColor.rule) }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
+                .foregroundStyle(selected ? NaviqColor.onForest : NaviqColor.ink)
+                .background { RoundedRectangle(cornerRadius: 3, style: .continuous).fill(selected ? NaviqColor.forest : Color.clear) }
+                .overlay { RoundedRectangle(cornerRadius: 3, style: .continuous).strokeBorder(selected ? Color.clear : NaviqColor.rule, lineWidth: 1) }
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(selected ? .isSelected : [])

@@ -68,15 +68,30 @@ private struct LaunchView: View {
 
 struct MainTabView: View {
     @Environment(AppRouter.self) private var router
+    @State private var keyboardVisible = false
 
     var body: some View {
         @Bindable var router = router
         TabView(selection: $router.tab) {
-            Tab("Home", systemImage: "safari", value: AppRouter.Tab.home) { HomeView() }
+            Tab("Home", systemImage: "house", value: AppRouter.Tab.home) { HomeView() }
             Tab("Discover", systemImage: "magnifyingglass", value: AppRouter.Tab.discover) { DiscoverView() }
-            Tab("Saathi", systemImage: "message.fill", value: AppRouter.Tab.saathi) { SaathiView() }
-            Tab("Roadmap", systemImage: "point.topright.arrow.triangle.backward.to.point.bottomleft.scurvepath", value: AppRouter.Tab.roadmap) { RoadmapView() }
+            Tab("Saathi", systemImage: "text.bubble", value: AppRouter.Tab.saathi) { SaathiView() }
+            Tab("Roadmap", systemImage: "signpost.right", value: AppRouter.Tab.roadmap) { RoadmapView() }
             Tab("Applications", systemImage: "tray.full", value: AppRouter.Tab.applications) { ApplicationsView() }
+        }
+        .toolbarVisibility(.hidden, for: .tabBar)
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if !keyboardVisible { NaviqTabBar(selection: $router.tab) }
+        }
+        .task {
+            for await _ in NotificationCenter.default.notifications(named: UIResponder.keyboardWillShowNotification) {
+                keyboardVisible = true
+            }
+        }
+        .task {
+            for await _ in NotificationCenter.default.notifications(named: UIResponder.keyboardWillHideNotification) {
+                keyboardVisible = false
+            }
         }
     }
 }

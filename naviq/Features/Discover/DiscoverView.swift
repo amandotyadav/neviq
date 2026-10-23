@@ -44,40 +44,54 @@ struct DiscoverView: View {
     @State private var model = DiscoverModel()
     @State private var searchText: String = ""
     @State private var showFilters = false
+    @Namespace private var categoryUnderline
+    @FocusState private var searchFocused: Bool
+
+    /// A featured piece only when real data justifies it: open, verified, fresh and a confirmed fit.
+    private var featured: Opportunity? {
+        guard model.query.text.isEmpty, !model.query.isFiltered, model.query.type == nil, model.query.sort == "relevance",
+              let first = model.items.first, first.availability == "open", first.isVerified, !first.isStale,
+              let m = first.match, !m.hardBlocked, m.audienceRestricted != true, m.confirmedFit == true else { return nil }
+        return first
+    }
+
+    /// Filters from the sheet only (the category tabs and search are shown on screen already).
+    private var hasAdvancedFilters: Bool {
+        let q = model.query
+        return q.workMode != nil || !q.location.isEmpty || !q.skills.isEmpty || q.verifiedOnly || q.includeClosed || q.campusOnly || q.deadlineWithinDays != nil
+    }
 
     var body: some View {
         NavigationStack {
             ScrollView {
-                LazyVStack(alignment: .leading, spacing: 0, pinnedViews: []) {
-                    Text("Discover")
-                        .font(NaviqFont.display)
-                        .foregroundStyle(NaviqColor.ink)
-                        .padding(.bottom, 4)
-                    Text("Every listing links to its official source. Unknown details stay marked unknown.")
-                        .font(.subheadline)
-                        .foregroundStyle(NaviqColor.inkSecondary)
-                        .padding(.bottom, NaviqSpacing.l)
+                LazyVStack(alignment: .leading, spacing: 0) {
+                    EditorialHeader(eyebrow: "Discover", title: "Opportunities worth your time",
+                                    subtitle: "Every listing links to its official source. Unknown details stay marked unknown.") {
+                        Button { showFilters = true } label: {
+                            HStack(spacing: 5) {
+                                Text("Filters")
+                                if hasAdvancedFilters { Circle().fill(NaviqColor.accent).frame(width: 6, height: 6) }
+                            }
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(NaviqColor.accent)
+                        }
+                        .accessibilityLabel(hasAdvancedFilters ? "Filters, active" : "Filters")
+                        .accessibilityIdentifier("discover.filters")
+                    }
+                    .padding(.top, 8)
 
-                    typeStrip.padding(.bottom, NaviqSpacing.m)
-                    resultsHeader
+                    searchField.padding(.top, 22)
+                    categoryNav.padding(.top, 18)
+                    resultsHeader.padding(.top, 22).padding(.bottom, 4)
                     results
-                    officialPortals.padding(.top, NaviqSpacing.xxl)
+                    officialPortals.padding(.top, 44)
                 }
                 .padding(.horizontal, NaviqSpacing.page)
-                .padding(.bottom, NaviqSpacing.xxl)
+                .padding(.bottom, 48)
             }
             .naviqPage()
-            .searchable(text: $searchText, prompt: "Title, organisation, or skill")
-            .onSubmit(of: .search) { model.query.text = searchText.trimmed }
-            .onChange(of: searchText) { _, new in if new.isEmpty { model.query.text = "" } }
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button { showFilters = true } label: {
-                        Image(systemName: model.query.isFiltered ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease.circle")
-                    }
-                    .accessibilityLabel(model.query.isFiltered ? "Filters, active" : "Filters")
-                }
-            }
+            .scrollDismissesKeyboard(.interactively)
+            .toolbar(.hidden, for: .navigationBar)
             .sheet(isPresented: $showFilters) {
                 FilterSheet(query: $model.query)
                     .presentationDetents([.medium, .large])
@@ -89,28 +103,72 @@ struct DiscoverView: View {
         }
     }
 
-    private var typeStrip: some View {
+    // MARK: Search & categories
+
+    private var searchField: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "magnifyingglass").foregroundStyle(NaviqColor.inkSecondary)
+            TextField("Title, organisation or skill", text: $searchText)
+                .focused($searchFocused)
+                .submitLabel(.search)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+                .onSubmit { model.query.text = searchText.trimmed }
+                .accessibilityIdentifier("discover.search")
+            if !searchText.isEmpty {
+                Button {
+                    searchText = ""
+                    model.query.text = ""
+                } label: { Image(systemName: "xmark.circle.fill").foregroundStyle(NaviqColor.inkTertiary) }
+                    .accessibilityLabel("Clear search")
+            }
+        }
+        .padding(.vertical, 12)
+        .overlay(alignment: .bottom) { Rectangle().fill(NaviqColor.forest).frame(height: 1.5) }
+        .onChange(of: searchText) { _, new in if new.isEmpty, !model.query.text.isEmpty { model.query.text = "" } }
+    }
+
+    private var categoryNav: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
-                Button { model.query.type = nil } label: { Chip(text: "All", selected: model.query.type == nil) }
-                    .buttonStyle(.plain)
+            HStack(spacing: 22) {
+                categoryTab("All", selected: model.query.type == nil) { model.query.type = nil }
                 ForEach(OpportunityType.allCases) { t in
-                    Button { model.query.type = model.query.type == t ? nil : t } label: {
-                        Chip(text: t.label, selected: model.query.type == t, systemImage: t.symbol, fill: NaviqColor.block(for: t.rawValue))
-                    }
-                    .buttonStyle(.plain)
+                    categoryTab(t.label, selected: model.query.type == t) { model.query.type = model.query.type == t ? nil : t }
+                }
+            }
+            .padding(.horizontal, 1)
+            .padding(.trailing, 28)
+        }
+        .scrollClipDisabled()
+        .overlay(alignment: .bottom) { Hairline().offset(y: 1) }
+    }
+
+    private func categoryTab(_ title: String, selected: Bool, action: @escaping () -> Void) -> some View {
+        Button {
+            withAnimation(.snappy(duration: 0.25)) { action() }
+        } label: {
+            VStack(spacing: 8) {
+                Text(title)
+                    .font(.subheadline.weight(selected ? .semibold : .regular))
+                    .foregroundStyle(selected ? NaviqColor.ink : NaviqColor.inkSecondary)
+                ZStack {
+                    Rectangle().fill(Color.clear).frame(height: 2.5)
+                    if selected { Rectangle().fill(NaviqColor.accent).frame(height: 2.5).matchedGeometryEffect(id: "underline", in: categoryUnderline) }
                 }
             }
         }
-        .scrollClipDisabled()
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(selected ? .isSelected : [])
     }
+
+    // MARK: Results
 
     private var resultsHeader: some View {
         HStack {
             if case .loaded = model.state {
-                Text("\(model.total) result\(model.total == 1 ? "" : "s")").kickerStyle()
+                Text("\(model.total) result\(model.total == 1 ? "" : "s")").eyebrowStyle(NaviqColor.ink)
             } else {
-                Text("Results").kickerStyle()
+                Text("Results").eyebrowStyle(NaviqColor.ink)
             }
             Spacer()
             Menu {
@@ -120,8 +178,12 @@ struct DiscoverView: View {
                     Text("Recently updated").tag("recent")
                 }
             } label: {
-                Label(sortLabel, systemImage: "arrow.up.arrow.down")
-                    .font(.subheadline.weight(.semibold))
+                HStack(spacing: 4) {
+                    Text("Sort: \(sortLabel)")
+                    Image(systemName: "chevron.down").imageScale(.small)
+                }
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(NaviqColor.accent)
             }
         }
     }
@@ -137,7 +199,7 @@ struct DiscoverView: View {
     @ViewBuilder private var results: some View {
         switch model.state {
         case .idle, .loading:
-            SkeletonRows(count: 4).padding(.top, NaviqSpacing.m)
+            SkeletonRows(count: 4).padding(.top, NaviqSpacing.l)
         case .failed(let message):
             ErrorStateView(message: message) { Task { await model.reload() } }
         case .loaded where model.items.isEmpty:
@@ -148,17 +210,27 @@ struct DiscoverView: View {
                     ? "Try removing a filter. Closed listings are hidden unless you include them."
                     : "Naviq only lists opportunities verified against official sources. New listings appear as administrators verify them.",
                 actionTitle: model.query.isFiltered ? "Clear filters" : nil
-            ) { model.query = NaviqAPI.OpportunityQuery() }
+            ) { model.query = NaviqAPI.OpportunityQuery(); searchText = "" }
         case .loaded:
-            ForEach(model.items) { opp in
-                NavigationLink(value: OpportunityLink(id: opp.id)) { OpportunityRow(opportunity: opp) }
+            if let featured {
+                NavigationLink(value: OpportunityLink(id: featured.id)) { OpportunityFeature(opportunity: featured, eyebrow: "Featured · best match") }
                     .buttonStyle(.plain)
-                    .padding(.top, NaviqSpacing.m)
-                    .onAppear { if opp.id == model.items.last?.id { Task { await model.loadMore() } } }
+                    .padding(.top, NaviqSpacing.l)
             }
+            let list = featured == nil ? model.items : Array(model.items.dropFirst())
+            VStack(spacing: 0) {
+                ForEach(Array(list.enumerated()), id: \.element.id) { i, opp in
+                    if i > 0 || featured == nil { if i > 0 { Hairline() } }
+                    NavigationLink(value: OpportunityLink(id: opp.id)) { OpportunityRow(opportunity: opp, index: i + (featured == nil ? 1 : 2)) }
+                        .buttonStyle(.plain)
+                        .onAppear { if opp.id == model.items.last?.id { Task { await model.loadMore() } } }
+                }
+            }
+            .padding(.top, featured == nil ? 0 : NaviqSpacing.s)
             if let err = model.loadMoreError {
                 NoticeBanner(text: err).padding(.top, NaviqSpacing.m)
                 Button("Retry") { model.loadMoreError = nil; Task { await model.loadMore() } }
+                    .buttonStyle(SecondaryButtonStyle())
             } else if model.page < model.totalPages {
                 ProgressView().frame(maxWidth: .infinity).padding()
             }
@@ -167,28 +239,31 @@ struct DiscoverView: View {
 
     private var officialPortals: some View {
         VStack(alignment: .leading, spacing: NaviqSpacing.s) {
-            SectionHeader(kicker: "Official portals")
+            SectionEyebrow(title: "Official portals")
             Text("Browse these directly for listings Naviq hasn't verified yet.")
                 .font(.footnote)
                 .foregroundStyle(NaviqColor.inkSecondary)
-            portal("National Scholarship Portal", "scholarships.gov.in", "https://scholarships.gov.in/")
-            portal("AICTE National Internship Portal", "internship.aicte-india.org", "https://internship.aicte-india.org/")
-            portal("National Career Service", "ncs.gov.in", "https://www.ncs.gov.in/")
+            VStack(spacing: 0) {
+                portal("National Scholarship Portal", "scholarships.gov.in", "https://scholarships.gov.in/")
+                Hairline()
+                portal("AICTE National Internship Portal", "internship.aicte-india.org", "https://internship.aicte-india.org/")
+                Hairline()
+                portal("National Career Service", "ncs.gov.in", "https://www.ncs.gov.in/")
+            }
         }
-        .naviqCard()
     }
 
     private func portal(_ name: String, _ host: String, _ url: String) -> some View {
         Link(destination: URL(string: url)!) {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(name).font(.subheadline.weight(.semibold)).foregroundStyle(NaviqColor.ink)
-                    Text(host).font(.caption).foregroundStyle(NaviqColor.inkTertiary)
+                    Text(name).itemTitleStyle().foregroundStyle(NaviqColor.ink).multilineTextAlignment(.leading)
+                    Text(host).font(.caption).foregroundStyle(NaviqColor.inkSecondary)
                 }
                 Spacer()
-                Image(systemName: "arrow.up.right.circle.fill").foregroundStyle(NaviqColor.accent)
+                Image(systemName: "arrow.up.right").font(.footnote.weight(.semibold)).foregroundStyle(NaviqColor.accent)
             }
-            .padding(.vertical, 6)
+            .padding(.vertical, 14)
         }
         .accessibilityHint("Opens the official website")
     }
@@ -206,38 +281,47 @@ struct FilterSheet: View {
 
     var body: some View {
         NavigationStack {
-            Form {
-                Section("Availability") {
-                    Toggle("Include closed listings", isOn: $draft.includeClosed)
-                    Toggle("Verified sources only", isOn: $draft.verifiedOnly)
-                    Toggle("My campus only", isOn: $draft.campusOnly)
-                    Picker("Closing within", selection: $draft.deadlineWithinDays) {
-                        Text("Any time").tag(Int?.none)
-                        Text("7 days").tag(Int?.some(7))
-                        Text("30 days").tag(Int?.some(30))
-                        Text("90 days").tag(Int?.some(90))
+            ScrollView {
+                VStack(alignment: .leading, spacing: 30) {
+                    EditorialHeader(eyebrow: "Discover", title: "Filters")
+
+                    group("Availability") {
+                        toggleRow("Include closed listings", isOn: $draft.includeClosed)
+                        toggleRow("Verified sources only", isOn: $draft.verifiedOnly)
+                        toggleRow("My campus only", isOn: $draft.campusOnly)
+                    }
+
+                    group("Closing within") {
+                        FlowLayout(spacing: 8) {
+                            ForEach([(Int?.none, "Any time"), (Int?.some(7), "7 days"), (Int?.some(30), "30 days"), (Int?.some(90), "90 days")], id: \.1) { value, label in
+                                Button { draft.deadlineWithinDays = value } label: { Chip(text: label, selected: draft.deadlineWithinDays == value) }
+                                    .buttonStyle(.plain)
+                            }
+                        }
+                    }
+
+                    group("Work mode") {
+                        FlowLayout(spacing: 8) {
+                            ForEach([(String?.none, "Any"), (String?.some("remote"), "Remote"), (String?.some("hybrid"), "Hybrid"), (String?.some("onsite"), "On-site")], id: \.1) { value, label in
+                                Button { draft.workMode = value } label: { Chip(text: label, selected: draft.workMode == value) }
+                                    .buttonStyle(.plain)
+                            }
+                        }
+                    }
+
+                    group("Location") {
+                        TextField("City or state", text: $draft.location)
+                            .padding(.vertical, 12)
+                            .overlay(alignment: .bottom) { Rectangle().fill(NaviqColor.forest).frame(height: 1.5) }
+                    }
+
+                    group("Skills") {
+                        TokenEditor(title: "Show listings that ask for any of these", tokens: $draft.skills, suggestions: [])
                     }
                 }
-                Section("Work mode") {
-                    Picker("Work mode", selection: $draft.workMode) {
-                        Text("Any").tag(String?.none)
-                        Text("Remote").tag(String?.some("remote"))
-                        Text("Hybrid").tag(String?.some("hybrid"))
-                        Text("On-site").tag(String?.some("onsite"))
-                    }
-                    .pickerStyle(.segmented)
-                }
-                Section("Location") {
-                    TextField("City or state", text: $draft.location)
-                }
-                Section {
-                    TokenEditor(title: "Skills", tokens: $draft.skills, suggestions: [])
-                } footer: {
-                    Text("Shows listings that ask for any of these skills.")
-                }
+                .padding(NaviqSpacing.page)
             }
-            .navigationTitle("Filters")
-            .navigationBarTitleDisplayMode(.inline)
+            .naviqPage()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Reset") { draft = NaviqAPI.OpportunityQuery(text: query.text, type: query.type, sort: query.sort) }
@@ -246,6 +330,24 @@ struct FilterSheet: View {
                     Button("Apply") { query = draft; dismiss() }.fontWeight(.semibold)
                 }
             }
+            .navigationBarTitleDisplayMode(.inline)
+            .tint(NaviqColor.accent)
+        }
+    }
+
+    private func group<C: View>(_ title: String, @ViewBuilder _ content: () -> C) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            SectionEyebrow(title: title)
+            content()
+        }
+    }
+
+    private func toggleRow(_ title: String, isOn: Binding<Bool>) -> some View {
+        VStack(spacing: 0) {
+            Toggle(isOn: isOn) { Text(title).font(.system(.body, design: .serif)).foregroundStyle(NaviqColor.ink) }
+                .tint(NaviqColor.forest)
+                .padding(.vertical, 8)
+            Hairline()
         }
     }
 }

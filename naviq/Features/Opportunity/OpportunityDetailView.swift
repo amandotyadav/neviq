@@ -78,6 +78,8 @@ struct OpportunityDetailView: View {
         }
         .naviqPage()
         .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(NaviqColor.paper, for: .navigationBar)
+        .toolbarBackgroundVisibility(.visible, for: .navigationBar)
         .task { await model.load() }
         .sheet(isPresented: $showTrack) {
             if let opp = model.opportunity.value {
@@ -136,52 +138,55 @@ struct OpportunityDetailView: View {
     // MARK: Header & facts
 
     private func header(_ opp: Opportunity) -> some View {
-        let block = NaviqColor.block(for: opp.opportunityType)
         let type = OpportunityType(rawValue: opp.opportunityType)
-        return VStack(alignment: .leading, spacing: NaviqSpacing.m) {
-            HStack(spacing: 10) {
-                IconBadge(systemImage: type?.symbol ?? "sparkles", fill: NaviqColor.surface.opacity(0.75), size: 46)
-                Text(opp.typeLabel)
-                    .font(.system(.footnote, design: .rounded).weight(.heavy))
-                    .padding(.horizontal, 10).padding(.vertical, 5)
-                    .background { Capsule().fill(NaviqColor.surface.opacity(0.75)) }
-                if opp.isCampus { Text("Campus listing").font(.system(.footnote, design: .rounded).weight(.heavy)) }
-                Spacer(minLength: 0)
+        return VStack(alignment: .leading, spacing: NaviqSpacing.s) {
+            HStack(spacing: 6) {
+                Image(systemName: type?.symbol ?? "doc.text").font(.footnote)
+                Text(opp.typeLabel).font(.footnote.weight(.semibold))
+                if opp.isCampus { Text("· Campus listing").font(.footnote.weight(.semibold)) }
             }
+            .foregroundStyle(NaviqColor.inkSecondary)
             Text(opp.title)
-                .font(.system(.title2, design: .rounded).weight(.heavy))
+                .screenTitleStyle()
+                .foregroundStyle(NaviqColor.ink)
                 .multilineTextAlignment(.leading)
                 .accessibilityAddTraits(.isHeader)
-            Text(opp.organization).font(.system(.title3, design: .rounded).weight(.semibold)).opacity(0.8)
-            FlowLayout(spacing: 8) {
+            Text(opp.organization).font(.system(.title3, design: .serif)).foregroundStyle(NaviqColor.inkSecondary)
+            FlowLayout(spacing: 14) {
                 VerificationLabel(status: opp.verificationStatus, lastVerifiedAt: opp.lastVerifiedAt, isStale: opp.isStale)
-                    .padding(.horizontal, 10).padding(.vertical, 6)
-                    .background { Capsule().fill(NaviqColor.surface) }
                 DeadlineLabel(availability: opp.availability, deadline: opp.deadline)
-                    .padding(.horizontal, 10).padding(.vertical, 6)
-                    .background { Capsule().fill(NaviqColor.surface) }
             }
+            .padding(.top, 2)
         }
-        .foregroundStyle(NaviqColor.ink)
-        .padding(NaviqSpacing.xl)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background { RoundedRectangle(cornerRadius: 28, style: .continuous).fill(block) }
         .padding(.top, NaviqSpacing.s)
     }
 
     private func factsGrid(_ opp: Opportunity) -> some View {
-        VStack(alignment: .leading, spacing: NaviqSpacing.m) {
-        Grid(alignment: .topLeading, horizontalSpacing: NaviqSpacing.m, verticalSpacing: NaviqSpacing.m) {
-            GridRow {
-                fact("calendar", "Deadline", opp.deadline.map { $0.formatted(date: .abbreviated, time: .omitted) } ?? "Not published")
-                fact("indianrupeesign.circle.fill", opp.award != nil ? "Award" : "Stipend", opp.moneyLine ?? ((opp.award ?? opp.stipend)?.description != nil ? "See details" : "Not published"))
+        let rows: [(String, String)] = [
+            ("Deadline", opp.deadline.map { $0.formatted(date: .abbreviated, time: .omitted) } ?? "Not published"),
+            (opp.award != nil ? "Award" : "Stipend", opp.moneyLine ?? ((opp.award ?? opp.stipend)?.description != nil ? "See details below" : "Not published")),
+            ("Location", [opp.workModeLabel, opp.location?.display].compactMap { $0 }.joined(separator: " · ").nilIfEmpty ?? (opp.workMode == "not_applicable" ? "Not applicable" : "Not published")),
+            ("Duration", opp.duration ?? (opp.opportunityType == "scholarship" ? "Per academic year" : "Not published")),
+        ]
+        return VStack(alignment: .leading, spacing: NaviqSpacing.s) {
+            VStack(spacing: 0) {
+                ForEach(Array(rows.enumerated()), id: \.offset) { i, row in
+                    if i > 0 { Hairline() }
+                    HStack(alignment: .firstTextBaseline) {
+                        Text(row.0).eyebrowStyle()
+                        Spacer(minLength: NaviqSpacing.l)
+                        Text(row.1)
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(row.1 == "Not published" ? NaviqColor.inkSecondary : NaviqColor.ink)
+                            .multilineTextAlignment(.trailing)
+                    }
+                    .padding(.vertical, 12)
+                    .accessibilityElement(children: .combine)
+                }
             }
-            GridRow {
-                fact("mappin.circle.fill", "Where", [opp.workModeLabel, opp.location?.display].compactMap { $0 }.joined(separator: " · ").nilIfEmpty ?? (opp.workMode == "not_applicable" ? "Not applicable" : "Not published"))
-                fact("clock.fill", "Duration", opp.duration ?? (opp.opportunityType == "scholarship" ? "Per academic year" : "Not published"))
-            }
-        }
-            // Long source notes sit below the grid so the four cards stay the same size.
+            .overlay(alignment: .top) { Rectangle().fill(NaviqColor.forest).frame(height: 1.5) }
+            .overlay(alignment: .bottom) { Hairline() }
+            // Long source notes sit below the list so the rows stay compact.
             ForEach([opp.deadlineNote, (opp.award ?? opp.stipend)?.description].compactMap { $0 }, id: \.self) { note in
                 Label(note, systemImage: "info.circle")
                     .font(NaviqFont.meta)
@@ -189,22 +194,6 @@ struct OpportunityDetailView: View {
                     .labelStyle(.titleAndIcon)
             }
         }
-    }
-
-    private func fact(_ symbol: String, _ label: String, _ value: String, note: String? = nil) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Image(systemName: symbol).foregroundStyle(NaviqColor.accent)
-            Text(label).font(NaviqFont.kicker).foregroundStyle(NaviqColor.inkTertiary)
-            Text(value)
-                .font(.system(.headline, design: .rounded).weight(.heavy))
-                .foregroundStyle(value == "Not published" ? NaviqColor.inkTertiary : NaviqColor.ink)
-            if let note {
-                Text(note).font(.caption).foregroundStyle(NaviqColor.inkTertiary).fixedSize(horizontal: false, vertical: true)
-            }
-        }
-        .naviqCard(padding: 14, radius: 20)
-        .frame(maxHeight: .infinity, alignment: .top)
-        .accessibilityElement(children: .combine)
     }
 
     // MARK: Actions
@@ -238,14 +227,15 @@ struct OpportunityDetailView: View {
                     }
                     .buttonStyle(SecondaryButtonStyle())
                 } else {
-                    Button { showTrack = true } label: { Label("Track", systemImage: "plus.circle") }
-                        .buttonStyle(PrimaryButtonStyle())
+                    Button { showTrack = true } label: { Label("Track", systemImage: "plus") }
+                        .buttonStyle(SecondaryButtonStyle())
                 }
             }
             if let url = URL(string: opp.applicationUrl ?? opp.sourceUrl) {
                 Link(destination: url) {
                     HStack {
                         Text(opp.availability == "closed" ? "View on official site" : "Apply on the official site")
+                        Spacer(minLength: 8)
                         Image(systemName: "arrow.up.right")
                     }
                 }
@@ -304,7 +294,8 @@ struct OpportunityDetailView: View {
                     }
                 }
                 .padding(NaviqSpacing.l)
-                .background { RoundedRectangle(cornerRadius: 12).fill(NaviqColor.accentSoft) }
+                .background { Rectangle().fill(NaviqColor.accentSoft) }
+                .overlay(alignment: .leading) { Rectangle().fill(NaviqColor.accent).frame(width: 3) }
             }
         }
     }
@@ -315,7 +306,7 @@ struct OpportunityDetailView: View {
         VStack(alignment: .leading, spacing: NaviqSpacing.m) {
             SectionHeader(kicker: "From the official source")
             if let desc = opp.officialDescription {
-                Text(desc).foregroundStyle(NaviqColor.ink)
+                Text(desc).font(.system(.body, design: .serif)).lineSpacing(4).foregroundStyle(NaviqColor.ink)
             } else {
                 Text("The source description hasn't been captured. Read the official page for full details.")
                     .foregroundStyle(NaviqColor.inkSecondary)

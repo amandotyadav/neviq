@@ -40,44 +40,63 @@ struct ApplicationsView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: NaviqSpacing.xl) {
-                    Text("Applications").font(NaviqFont.display).foregroundStyle(NaviqColor.ink)
-                    Picker("Show", selection: $model.showArchived) {
-                        Text("Active").tag(false)
-                        Text("Archived").tag(true)
+                VStack(alignment: .leading, spacing: 0) {
+                    EditorialHeader(eyebrow: "Applications", title: "Where things stand",
+                                    subtitle: "Naviq records what you tell it. Nothing here is submitted for you.") {
+                        HStack(spacing: 18) {
+                            NavigationLink { DraftsListView() } label: { Text("Drafts") }
+                                .accessibilityIdentifier("applications.drafts")
+                            Button { showAdd = true } label: { Label("Add", systemImage: "plus") }
+                                .accessibilityLabel("Add an application")
+                        }
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(NaviqColor.accent)
                     }
-                    .pickerStyle(.segmented)
+                    .padding(.top, 8)
+
+                    HStack(spacing: 24) {
+                        ForEach([(false, "Active"), (true, "Archived")], id: \.0) { value, label in
+                            Button { withAnimation(.snappy(duration: 0.25)) { model.showArchived = value } } label: {
+                                VStack(spacing: 8) {
+                                    Text(label)
+                                        .font(.subheadline.weight(model.showArchived == value ? .semibold : .regular))
+                                        .foregroundStyle(model.showArchived == value ? NaviqColor.ink : NaviqColor.inkSecondary)
+                                    Rectangle().fill(model.showArchived == value ? NaviqColor.accent : Color.clear).frame(height: 2.5)
+                                }
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityAddTraits(model.showArchived == value ? .isSelected : [])
+                        }
+                        Spacer()
+                    }
+                    .overlay(alignment: .bottom) { Hairline().offset(y: 1) }
+                    .padding(.top, 22)
 
                     if model.notificationStatus == .denied {
                         NoticeBanner(text: "Notifications are off for Naviq, so deadline reminders won't appear. Turn them on in iOS Settings ▸ Naviq ▸ Notifications.", tone: .info)
+                            .padding(.top, 18)
                     }
 
                     switch model.state {
-                    case .idle, .loading: SkeletonRows(count: 3)
-                    case .failed(let m): ErrorStateView(message: m) { Task { await model.load() } }
+                    case .idle, .loading: SkeletonRows(count: 3).padding(.top, 28)
+                    case .failed(let m): ErrorStateView(message: m) { Task { await model.load() } }.padding(.top, 20)
                     case .loaded(let list) where list.isEmpty:
                         EmptyStateView(symbol: "tray",
                                        title: model.showArchived ? "Nothing archived" : "Nothing tracked yet",
                                        message: model.showArchived ? "Archived applications appear here." : "Track an opportunity from its detail page, or add one you found elsewhere.",
                                        actionTitle: model.showArchived ? nil : "Find opportunities") { router.tab = .discover }
+                            .padding(.top, 28)
                     case .loaded(let list):
-                        grouped(list)
+                        overview(list).padding(.top, 30)
+                        grouped(list).padding(.top, 34)
                     }
                 }
                 .padding(.horizontal, NaviqSpacing.page)
-                .padding(.bottom, NaviqSpacing.xxl)
+                .padding(.bottom, 48)
             }
             .naviqPage()
+            .toolbar(.hidden, for: .navigationBar)
             .refreshable { await model.load() }
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    NavigationLink { DraftsListView() } label: { Label("Drafts", systemImage: "doc.on.doc").labelStyle(.titleAndIcon) }
-                }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button { showAdd = true } label: { Image(systemName: "plus") }
-                        .accessibilityLabel("Add an application")
-                }
-            }
             .task(id: "\(model.showArchived)-\(router.applicationsVersion)") { await model.load() }
             .sheet(isPresented: $showAdd) {
                 AddApplicationSheet { app in model.replace(app) }
@@ -95,21 +114,38 @@ struct ApplicationsView: View {
         }
     }
 
+    /// Stage counts from the student's own records.
+    private func overview(_ list: [TrackedApplication]) -> some View {
+        let stages: [(ApplicationStatus, String)] = [(.interested, "Interest"), (.preparing, "Prep"), (.ready_to_apply, "Ready"), (.applied, "Applied"), (.assessment, "Test"), (.interview, "Interview"), (.offer, "Offer")]
+        return VStack(alignment: .leading, spacing: 12) {
+            SectionEyebrow(title: "Overview")
+            ProgressPath(stages: stages.map { s in .init(id: s.0.rawValue, label: s.1, count: list.filter { $0.status == s.0 }.count) })
+            let dueSoon = list.filter { $0.status.isPreApply && ($0.deadline.map { Dates.daysUntil($0) <= 7 && Dates.daysUntil($0) >= 0 } ?? false) }.count
+            if dueSoon > 0 {
+                Label("\(dueSoon) closing within a week", systemImage: "clock")
+                    .font(.footnote.weight(.semibold)).foregroundStyle(NaviqColor.coral)
+            }
+        }
+    }
+
     @ViewBuilder private func grouped(_ list: [TrackedApplication]) -> some View {
         let preparing = list.filter { $0.status.isPreApply }.sorted { ($0.deadline ?? .distantFuture) < ($1.deadline ?? .distantFuture) }
         let active = list.filter { !$0.status.isPreApply && !$0.status.isClosed }
         let closed = list.filter { $0.status.isClosed }
-        if !preparing.isEmpty { section("Before you apply", preparing) }
-        if !active.isEmpty { section("Submitted & in progress", active) }
-        if !closed.isEmpty { section("Outcomes", closed) }
+        VStack(alignment: .leading, spacing: 34) {
+            if !preparing.isEmpty { section("Before you apply", preparing) }
+            if !active.isEmpty { section("Submitted & in progress", active) }
+            if !closed.isEmpty { section("Outcomes", closed) }
+        }
     }
 
     private func section(_ title: String, _ apps: [TrackedApplication]) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            SectionHeader(kicker: title) { Text("\(apps.count)").font(.caption.monospacedDigit()).foregroundStyle(NaviqColor.inkTertiary) }
-            ForEach(apps) { app in
+            SectionEyebrow(title: title) { Text("\(apps.count)").font(.caption.weight(.semibold).monospacedDigit()).foregroundStyle(NaviqColor.inkSecondary) }
+                .padding(.bottom, 4)
+            ForEach(Array(apps.enumerated()), id: \.element.id) { i, app in
+                if i > 0 { Hairline() }
                 Button { selected = app } label: { ApplicationRow(app: app) }.buttonStyle(.plain)
-                    .padding(.top, NaviqSpacing.m)
             }
         }
     }
@@ -119,31 +155,34 @@ private struct ApplicationRow: View {
     let app: TrackedApplication
 
     var body: some View {
-        HStack(alignment: .top, spacing: NaviqSpacing.m) {
-            if let d = app.deadline, app.status.isPreApply {
-                Dateline(date: d, tint: Dates.daysUntil(d) <= 7 ? NaviqColor.coral : NaviqColor.ink)
-            } else {
-                IconBadge(systemImage: app.status.symbol, fill: app.status == .offer ? NaviqColor.mint : NaviqColor.lilac, size: 50)
-            }
-            VStack(alignment: .leading, spacing: 4) {
-                Text(app.title).font(NaviqFont.cardTitle).foregroundStyle(NaviqColor.ink).multilineTextAlignment(.leading)
-                if let org = app.organization { Text(org).font(.subheadline).foregroundStyle(NaviqColor.inkSecondary) }
+        HStack(alignment: .top, spacing: 16) {
+            VStack(alignment: .leading, spacing: 7) {
                 StatusBadge(status: app.status)
+                Text(app.title).itemTitleStyle().foregroundStyle(NaviqColor.ink).multilineTextAlignment(.leading)
+                if let org = app.organization { Text(org).font(.subheadline).foregroundStyle(NaviqColor.inkSecondary).multilineTextAlignment(.leading) }
                 if let next = app.nextAction {
                     let overdue = app.nextActionDue.map { $0 < .now } ?? false
-                    Label {
+                    HStack(alignment: .firstTextBaseline, spacing: 6) {
+                        Image(systemName: overdue ? "exclamationmark.circle" : "arrow.turn.down.right").font(.caption)
                         Text(next + (app.nextActionDue.map { " · \(overdue ? "was due" : "due") \(Dates.short($0))" } ?? ""))
-                    } icon: { Image(systemName: overdue ? "exclamationmark.circle" : "arrow.turn.down.right") }
-                        .font(.footnote)
-                        .foregroundStyle(overdue ? NaviqColor.coral : NaviqColor.inkSecondary)
+                            .font(.system(.footnote, design: .serif).italic())
+                            .multilineTextAlignment(.leading)
+                    }
+                    .foregroundStyle(overdue ? NaviqColor.coral : NaviqColor.inkSecondary)
                 }
             }
             Spacer(minLength: 0)
-            Image(systemName: "chevron.right").font(.footnote.weight(.bold)).foregroundStyle(NaviqColor.inkTertiary)
+            if app.status.isPreApply {
+                DeadlineIndicator(date: app.deadline, availability: "open")
+                    .frame(minWidth: 56, alignment: .trailing)
+            } else {
+                Image(systemName: "chevron.right").font(.footnote.weight(.semibold)).foregroundStyle(NaviqColor.inkTertiary).padding(.top, 4)
+            }
         }
-        .naviqCard()
+        .padding(.vertical, 16)
         .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
+        .accessibilityHint("Opens the application")
     }
 }
 

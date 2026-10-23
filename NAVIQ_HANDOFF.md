@@ -16,6 +16,9 @@ Give this file + `NAVIQ_FEATURES.md` to the next AI agent. Last updated: 2026-10
 ```
 Not a git repository (consider `git init`; add `.gitignore` for `server/.env`, `server/.data`, `node_modules`).
 
+## UI: Naviq Editorial (branch feature/ui)
+Design system in `naviq/Design/`: `Theme.swift` (tokens, serif type roles, geometry), `Components.swift` (buttons, chips, states), `Editorial.swift` (RouteGraphic, WaypointMarker, EditorialHeader, SectionEyebrow, DeadlineIndicator, EligibilityStamp, ProgressPath, PrimaryAction, NaviqTabBar), `OpportunityRow.swift` (editorial row + OpportunityFeature). Custom tab bar replaces the system one (hidden while the keyboard is up). UI only: models, API calls and logic are unchanged.
+
 ## Daily refresh (scrapers)
 `ingest/` (Python venv at `ingest/.venv`, see `ingest/README.md`). `cd server && npm run refresh` runs it now; the server also runs it daily at 03:00 IST (`ENABLE_DAILY_REFRESH`). Dev DB URI for one-off scripts: `MONGODB_URI=mongodb://127.0.0.1:27027/naviq JWT_SECRET=<32+ chars>`. Curated records carry `externalId` (e.g. `nsp:aicte-pragati-…`, `ias:srfp-2027`) so scrapes merge instead of duplicating.
 

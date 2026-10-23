@@ -41,32 +41,25 @@ struct RoadmapView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: NaviqSpacing.xl) {
-                    Text("Roadmap").font(NaviqFont.display).foregroundStyle(NaviqColor.ink)
+                VStack(alignment: .leading, spacing: 0) {
                     switch model.state {
-                    case .idle, .loading: SkeletonRows(count: 3)
-                    case .failed(let m): ErrorStateView(message: m) { Task { await model.load() } }
+                    case .idle, .loading:
+                        EditorialHeader(eyebrow: "Roadmap", title: "Your route").padding(.top, 8)
+                        SkeletonRows(count: 3).padding(.top, 28)
+                    case .failed(let m):
+                        EditorialHeader(eyebrow: "Roadmap", title: "Your route").padding(.top, 8)
+                        ErrorStateView(message: m) { Task { await model.load() } }.padding(.top, 20)
                     case .loaded(nil): emptyState
                     case .loaded(let r?): roadmapContent(r)
                     }
-                    if let e = model.actionError { NoticeBanner(text: e) }
+                    if let e = model.actionError { NoticeBanner(text: e).padding(.top, 16) }
                 }
                 .padding(.horizontal, NaviqSpacing.page)
-                .padding(.bottom, NaviqSpacing.xxl)
+                .padding(.bottom, 48)
             }
             .naviqPage()
+            .toolbar(.hidden, for: .navigationBar)
             .refreshable { await model.load() }
-            .toolbar {
-                if model.roadmap != nil {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Menu {
-                            Button { showAdd = true } label: { Label("Add milestone", systemImage: "plus") }
-                            Button { showGenerate = true } label: { Label("Generate a new roadmap", systemImage: "sparkles") }
-                        } label: { Image(systemName: "plus.circle") }
-                            .accessibilityLabel("Roadmap actions")
-                    }
-                }
-            }
             .task(id: router.roadmapVersion) { await model.load() }
             .sheet(isPresented: $showGenerate) {
                 GenerateRoadmapSheet(defaultGoal: model.roadmap?.goal ?? session.user?.profile.careerGoal ?? "") { roadmap in
@@ -84,51 +77,56 @@ struct RoadmapView: View {
         }
     }
 
+    /// First use: an intentional opening, not an empty list.
     private var emptyState: some View {
         VStack(alignment: .leading, spacing: NaviqSpacing.l) {
-            Text("A plan you can actually follow.")
-                .font(NaviqFont.headline)
-                .foregroundStyle(NaviqColor.ink)
-            Text("Saathi turns your goal and profile into milestones with concrete steps. Or add your own — your roadmap works without AI.")
-                .foregroundStyle(NaviqColor.inkSecondary)
+            EditorialHeader(eyebrow: "Roadmap", title: "A route you can actually follow",
+                            subtitle: "Saathi turns your goal and profile into milestones with concrete steps. Or add your own — your roadmap works without AI.")
+                .padding(.top, 8)
+            RouteGraphic(waypoints: 5, completed: 0)
+                .frame(height: 150)
+                .padding(.vertical, 8)
             if model.aiAvailable == false {
-                Button("Add your first milestone") { showAdd = true }
-                    .buttonStyle(PrimaryButtonStyle())
+                PrimaryAction(title: "Add your first milestone", systemImage: "plus") { showAdd = true }
                 NoticeBanner(text: "Saathi AI isn't configured on this server, so AI-generated roadmaps are unavailable. Manual milestones work fully.", tone: .info)
             } else {
-                Button { showGenerate = true } label: { Label("Generate with Saathi", systemImage: "sparkles") }
-                    .buttonStyle(PrimaryButtonStyle())
+                PrimaryAction(title: "Generate with Saathi") { showGenerate = true }
                 Button("Add a milestone myself") { showAdd = true }
                     .buttonStyle(SecondaryButtonStyle())
             }
         }
-        .padding(.top, NaviqSpacing.l)
     }
 
     private func roadmapContent(_ r: Roadmap) -> some View {
-        VStack(alignment: .leading, spacing: NaviqSpacing.xl) {
-            VStack(alignment: .leading, spacing: NaviqSpacing.s) {
-                Text("Goal").kickerStyle(NaviqColor.coral)
-                Text(r.goal).font(NaviqFont.title).foregroundStyle(NaviqColor.ink)
-                if let summary = r.summary {
-                    Text(summary).foregroundStyle(NaviqColor.inkSecondary)
-                    if r.generatedBy == "ai" {
-                        Label("Plan drafted by Saathi AI from your profile", systemImage: "sparkles")
-                            .font(.caption).foregroundStyle(NaviqColor.inkTertiary)
-                    }
+        VStack(alignment: .leading, spacing: 0) {
+            EditorialHeader(eyebrow: "Roadmap · Your goal", title: r.goal, subtitle: r.summary) {
+                Menu {
+                    Button { showAdd = true } label: { Label("Add milestone", systemImage: "plus") }
+                    Button { showGenerate = true } label: { Label("Generate a new roadmap", systemImage: "sparkles") }
+                } label: {
+                    HStack(spacing: 4) { Image(systemName: "plus"); Text("Add") }
+                        .font(.subheadline.weight(.semibold)).foregroundStyle(NaviqColor.accent)
                 }
+                .accessibilityLabel("Roadmap actions")
             }
-            VStack(alignment: .leading, spacing: 6) {
-                HStack(spacing: NaviqSpacing.l) {
-                    ProgressRing(completed: r.progress.completed, total: r.progress.total)
-                    Text("\(r.progress.completed) of \(r.progress.total) milestones complete")
-                        .font(NaviqFont.cardTitle)
-                        .foregroundStyle(NaviqColor.ink)
-                }
-                .naviqCard()
+            .padding(.top, 8)
+            if r.generatedBy == "ai" {
+                Label("Plan drafted by Saathi AI from your profile", systemImage: "sparkles")
+                    .font(.caption).foregroundStyle(NaviqColor.inkTertiary).padding(.top, 8)
             }
-            .accessibilityElement(children: .combine)
 
+            VStack(alignment: .leading, spacing: 6) {
+                RouteGraphic(waypoints: max(r.progress.total, 2), completed: r.progress.completed)
+                    .frame(height: 84)
+                Text("\(r.progress.completed) of \(r.progress.total) milestones complete")
+                    .font(.footnote.monospacedDigit()).foregroundStyle(NaviqColor.inkSecondary)
+            }
+            .padding(.vertical, 22)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Roadmap progress")
+            .accessibilityValue("\(r.progress.completed) of \(r.progress.total) milestones complete")
+
+            SectionEyebrow(title: "The journey").padding(.bottom, 20)
             VStack(alignment: .leading, spacing: 0) {
                 ForEach(Array(r.milestones.enumerated()), id: \.element.id) { index, m in
                     MilestoneRow(milestone: m, index: index + 1, isLast: index == r.milestones.count - 1,
@@ -152,37 +150,62 @@ private struct MilestoneRow: View {
     @State private var date: Date = .now
 
     private var done: Bool { milestone.status == "completed" }
+    private var markerState: WaypointState {
+        switch milestone.status {
+        case "completed": .done
+        case "in_progress": .current
+        case "paused": .paused
+        default: .upcoming
+        }
+    }
+    @State private var pop = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
-        HStack(alignment: .top, spacing: NaviqSpacing.m) {
+        HStack(alignment: .top, spacing: 16) {
+            // Waypoint with a path down to the next one.
             VStack(spacing: 0) {
-                ZStack {
-                    Circle().fill(done ? NaviqColor.jade : NaviqColor.surfaceSunken).frame(width: 30, height: 30)
-                    Circle().strokeBorder(done ? NaviqColor.jade : milestone.status == "in_progress" ? NaviqColor.accent : Color.clear, lineWidth: 2.5)
-                        .frame(width: 30, height: 30)
-                    if done { Image(systemName: "checkmark").font(.caption.weight(.bold)).foregroundStyle(NaviqColor.paper) }
-                    else { Text("\(index)").font(.caption.weight(.bold).monospacedDigit()).foregroundStyle(NaviqColor.ink) }
+                WaypointMarker(state: markerState, size: 24)
+                    .scaleEffect(pop ? 1.3 : 1)
+                    .padding(.top, 3)
+                if !isLast {
+                    Rectangle()
+                        .fill(done ? NaviqColor.forest : NaviqColor.rule)
+                        .frame(width: done ? 2 : 1.5)
+                        .frame(maxHeight: .infinity)
                 }
             }
-            .accessibilityHidden(true)
+            .frame(width: 24)
 
-            VStack(alignment: .leading, spacing: NaviqSpacing.s) {
+            VStack(alignment: .leading, spacing: 10) {
                 Button(action: toggle) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        HStack(spacing: 6) {
-                            Text(statusLabel).kickerStyle(statusColor)
-                            Text("· \(milestone.priority.capitalized) priority").kickerStyle()
+                    VStack(alignment: .leading, spacing: 6) {
+                        HStack(spacing: 8) {
+                            Text(String(format: "%02d", index)).font(.caption.weight(.semibold).monospacedDigit()).foregroundStyle(NaviqColor.accent)
+                            Text(statusLabel).eyebrowStyle(statusColor)
+                            Text("· \(milestone.priority.capitalized) priority").eyebrowStyle(NaviqColor.inkTertiary)
+                            Spacer(minLength: 0)
+                            Image(systemName: "chevron.down").font(.caption.weight(.semibold)).foregroundStyle(NaviqColor.inkTertiary)
+                                .rotationEffect(.degrees(expanded ? 180 : 0))
                         }
                         Text(milestone.title)
-                            .font(NaviqFont.cardTitle)
-                            .strikethrough(done, color: NaviqColor.inkTertiary)
+                            .sectionTitleStyle()
                             .foregroundStyle(done ? NaviqColor.inkSecondary : NaviqColor.ink)
                             .multilineTextAlignment(.leading)
-                        if let effort = milestone.effortEstimate {
-                            Text("Estimate: \(effort)").font(.footnote).foregroundStyle(NaviqColor.inkTertiary)
+                        if let purpose = milestone.purpose, !expanded {
+                            Text(purpose).font(.subheadline).foregroundStyle(NaviqColor.inkSecondary).lineLimit(2).multilineTextAlignment(.leading)
                         }
                         if let t = milestone.targetDate {
                             Label("Target \(Dates.short(t))", systemImage: "flag").font(.footnote).foregroundStyle(NaviqColor.inkSecondary)
+                        }
+                        if let effort = milestone.effortEstimate {
+                            Text("Estimate: \(effort)").font(.footnote).foregroundStyle(NaviqColor.inkTertiary)
+                        }
+                        if !done, let next = milestone.steps.first, !expanded {
+                            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                                Text("Next").eyebrowStyle(NaviqColor.accent)
+                                Text(next).font(.system(.subheadline, design: .serif).italic()).foregroundStyle(NaviqColor.ink).multilineTextAlignment(.leading)
+                            }
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -194,16 +217,22 @@ private struct MilestoneRow: View {
 
                 if expanded { details }
 
-                HStack(spacing: NaviqSpacing.s) {
+                HStack(spacing: 10) {
                     if !done {
                         Button(milestone.status == "in_progress" ? "Mark complete" : "Start") {
                             Task {
-                                await model.update(milestone, ["status": milestone.status == "in_progress" ? "completed" : "in_progress"])
+                                let completing = milestone.status == "in_progress"
+                                await model.update(milestone, ["status": completing ? "completed" : "in_progress"])
                                 Haptics.success()
+                                if completing, !reduceMotion {
+                                    withAnimation(.spring(duration: 0.3, bounce: 0.6)) { pop = true }
+                                    try? await Task.sleep(for: .milliseconds(320))
+                                    withAnimation(.spring) { pop = false }
+                                }
                             }
                         }
-                        .buttonStyle(.borderedProminent)
-                        .tint(milestone.status == "in_progress" ? NaviqColor.jade : NaviqColor.accent)
+                        .buttonStyle(PrimaryButtonStyle())
+                        .frame(width: 168)
                     }
                     Menu {
                         if done { Button("Reopen") { Task { await model.update(milestone, ["status": "in_progress"]) } } }
@@ -219,14 +248,15 @@ private struct MilestoneRow: View {
                         Divider()
                         Button("Delete milestone", role: .destructive) { Task { await model.delete(milestone) } }
                     } label: {
-                        Image(systemName: "ellipsis.circle").font(.title3).foregroundStyle(NaviqColor.inkSecondary)
+                        HStack(spacing: 6) { Image(systemName: "ellipsis"); Text("Options") }
+                            .font(.subheadline.weight(.semibold)).foregroundStyle(NaviqColor.inkSecondary)
+                            .frame(minHeight: 44)
                     }
                     .accessibilityLabel("More actions for \(milestone.title)")
                 }
             }
+            .padding(.bottom, isLast ? 4 : 30)
         }
-        .naviqCard()
-        .padding(.bottom, NaviqSpacing.m)
         .sheet(isPresented: $showDate) {
             NavigationStack {
                 DatePicker("Target date", selection: $date, in: Date.now..., displayedComponents: .date)

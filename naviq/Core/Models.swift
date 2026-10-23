@@ -174,6 +174,7 @@ nonisolated struct MatchInfo: Codable, Sendable, Equatable {
     let eligibilityOverall: String
     let hardBlocked: Bool
     let audienceRestricted: Bool?
+    let confirmedFit: Bool?
     let factors: [MatchFactor]
 }
 

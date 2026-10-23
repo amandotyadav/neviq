@@ -47,6 +47,8 @@ struct ProfileView: View {
             }
             .scrollContentBackground(.hidden)
             .naviqPage()
+            .tint(NaviqColor.forest)
+            .listRowSeparatorTint(NaviqColor.rule)
             .navigationTitle("Profile")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }

@@ -62,28 +62,31 @@ struct OnboardingFlow: View {
     }
 
     private var header: some View {
-        HStack {
-            NaviqMark(size: 24)
-            Spacer()
-            Text("Step \(step.rawValue + 1) of \(Step.allCases.count)")
-                .font(.footnote.monospacedDigit())
-                .foregroundStyle(NaviqColor.inkTertiary)
+        VStack(spacing: 14) {
+            HStack {
+                NaviqWordmark(markSize: 22)
+                Spacer()
+                Text("Step \(step.rawValue + 1) of \(Step.allCases.count)")
+                    .eyebrowStyle()
+            }
+            // Four waypoints joined by a path; completed legs are solid.
+            HStack(spacing: 0) {
+                ForEach(Step.allCases, id: \.rawValue) { s in
+                    WaypointMarker(state: s.rawValue < step.rawValue ? .done : s == step ? .current : .upcoming, size: 18)
+                    if s != Step.allCases.last {
+                        Rectangle()
+                            .fill(s.rawValue < step.rawValue ? NaviqColor.forest : NaviqColor.rule)
+                            .frame(height: s.rawValue < step.rawValue ? 2 : 1.5)
+                    }
+                }
+            }
+            .animation(.smooth, value: step)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Step \(step.rawValue + 1) of \(Step.allCases.count)")
         }
         .padding(.horizontal, NaviqSpacing.page)
         .padding(.top, NaviqSpacing.m)
-        .overlay(alignment: .bottom) {
-            GeometryReader { geo in
-                Capsule().fill(NaviqColor.surfaceSunken).frame(height: 8)
-                    .overlay(alignment: .leading) {
-                        Capsule().fill(NaviqColor.accent)
-                            .frame(width: geo.size.width * CGFloat(step.rawValue + 1) / CGFloat(Step.allCases.count), height: 8)
-                            .animation(.smooth, value: step)
-                    }
-            }
-            .frame(height: 8)
-            .offset(y: 14)
-        }
-        .padding(.bottom, NaviqSpacing.xl)
+        .padding(.bottom, NaviqSpacing.l)
     }
 
     private var footer: some View {

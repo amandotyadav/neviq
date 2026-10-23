@@ -68,7 +68,7 @@ struct SaathiView: View {
             VStack(spacing: 0) {
                 ScrollViewReader { proxy in
                     ScrollView {
-                        LazyVStack(alignment: .leading, spacing: NaviqSpacing.l) {
+                        LazyVStack(alignment: .leading, spacing: 26) {
                             intro
                             ForEach(model.messages) { m in
                                 MessageView(message: m, actionStates: model.actionStates) { action in
@@ -79,11 +79,13 @@ struct SaathiView: View {
                                 .id(m.id)
                             }
                             if model.sending {
-                                HStack(spacing: 8) {
-                                    ProgressView()
-                                    Text("Saathi is checking your data…").font(.subheadline).foregroundStyle(NaviqColor.inkSecondary)
+                                HStack(spacing: 10) {
+                                    RouteGraphic(waypoints: 3, completed: 1)
+                                        .frame(width: 54, height: 24)
+                                    Text("Saathi is checking your data…").font(.system(.subheadline, design: .serif).italic()).foregroundStyle(NaviqColor.inkSecondary)
                                 }
                                 .id("typing")
+                                .accessibilityLabel("Saathi is working")
                             }
                         }
                         .padding(NaviqSpacing.page)
@@ -96,16 +98,8 @@ struct SaathiView: View {
                 composer
             }
             .naviqPage()
-            .navigationTitle("Saathi")
-            .navigationBarTitleDisplayMode(.inline)
+            .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(for: OpportunityLink.self) { OpportunityDetailView(opportunityId: $0.id) }
-            .toolbar {
-                if !model.messages.isEmpty {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button("New chat") { model.messages = []; model.contextOpportunityId = nil }
-                    }
-                }
-            }
             .task { await model.checkStatus() }
             .task(id: router.saathiPrompt?.text) { await consumeQueuedPrompt() }
             .sheet(item: $composerFor) { opp in
@@ -115,55 +109,69 @@ struct SaathiView: View {
     }
 
     private var intro: some View {
-        VStack(alignment: .leading, spacing: NaviqSpacing.m) {
-            Text("Your assistant").kickerStyle(NaviqColor.accent)
-            Text("Ask about your opportunities, eligibility, deadlines, or next steps.")
-                .font(NaviqFont.headline)
-                .foregroundStyle(NaviqColor.ink)
-            Text("Saathi reads your Naviq profile and verified listings. It can suggest actions, but you confirm every change.")
-                .font(.footnote)
-                .foregroundStyle(NaviqColor.inkSecondary)
+        VStack(alignment: .leading, spacing: NaviqSpacing.l) {
+            EditorialHeader(eyebrow: "Saathi", title: "A calm place to think it through",
+                            subtitle: "Saathi reads your Naviq profile and verified listings. It can suggest actions, but you confirm every change.") {
+                if !model.messages.isEmpty {
+                    Button("New chat") { model.messages = []; model.contextOpportunityId = nil }
+                        .font(.subheadline.weight(.semibold)).foregroundStyle(NaviqColor.accent)
+                }
+            }
+            .padding(.top, 8)
             if model.aiAvailable == false {
                 NoticeBanner(text: "Saathi AI isn't configured on this server right now. Discover, eligibility checks, saving, tracking, and roadmaps still work.", tone: .info)
             }
             if model.messages.isEmpty {
-                FlowLayout(spacing: 8) {
-                    ForEach(suggestions, id: \.self) { s in
-                        Button { Task { await model.send(s) } } label: { Chip(text: s) }
-                            .buttonStyle(.plain)
-                            .disabled(model.sending || model.aiAvailable == false)
+                VStack(alignment: .leading, spacing: 0) {
+                    SectionEyebrow(title: "Try asking").padding(.bottom, 4)
+                    ForEach(Array(suggestions.enumerated()), id: \.element) { i, s in
+                        if i > 0 { Hairline() }
+                        Button { Task { await model.send(s) } } label: {
+                            HStack(alignment: .firstTextBaseline, spacing: 14) {
+                                Text(String(format: "%02d", i + 1)).font(.caption.weight(.semibold).monospacedDigit()).foregroundStyle(NaviqColor.accent)
+                                Text(s).font(.system(.body, design: .serif)).foregroundStyle(NaviqColor.ink).multilineTextAlignment(.leading)
+                                Spacer(minLength: 8)
+                                Image(systemName: "arrow.up.right").font(.footnote.weight(.semibold)).foregroundStyle(NaviqColor.inkTertiary)
+                            }
+                            .padding(.vertical, 14)
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(model.sending || model.aiAvailable == false)
+                        .opacity(model.aiAvailable == false ? 0.45 : 1)
                     }
                 }
-                .padding(.top, 4)
             }
         }
     }
 
     private var composer: some View {
         VStack(spacing: 0) {
-            Hairline()
-            HStack(alignment: .bottom, spacing: NaviqSpacing.s) {
-                TextField("Message Saathi", text: $input, axis: .vertical)
+            Rectangle().fill(NaviqColor.forest.opacity(0.9)).frame(height: 1.5)
+            HStack(alignment: .bottom, spacing: NaviqSpacing.m) {
+                TextField("", text: $input, prompt: Text("Ask Saathi…").foregroundStyle(NaviqColor.inkSecondary), axis: .vertical)
+                    .font(.system(.body, design: .serif))
                     .lineLimit(1...5)
                     .focused($inputFocused)
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 10)
-                    .background { RoundedRectangle(cornerRadius: 22, style: .continuous).fill(NaviqColor.surface) }
+                    .padding(.vertical, 12)
                     .submitLabel(.send)
                     .onSubmit(sendInput)
                     .disabled(model.aiAvailable == false)
+                    .accessibilityIdentifier("saathi.input")
                 Button(action: sendInput) {
                     Image(systemName: "arrow.up")
                         .font(.body.weight(.bold))
-                        .frame(width: 40, height: 40)
-                        .foregroundStyle(NaviqColor.onAccent)
-                        .background { Circle().fill(canSend ? NaviqColor.accent : NaviqColor.rule) }
+                        .frame(width: 42, height: 42)
+                        .foregroundStyle(NaviqColor.onForest)
+                        .background { RoundedRectangle(cornerRadius: 8, style: .continuous).fill(canSend ? NaviqColor.forest : NaviqColor.rule) }
                 }
+                .padding(.bottom, 5)
                 .disabled(!canSend)
                 .accessibilityLabel("Send")
+                .accessibilityIdentifier("saathi.send")
             }
             .padding(.horizontal, NaviqSpacing.page)
-            .padding(.vertical, NaviqSpacing.s)
+            .padding(.bottom, 10)
         }
         .background { NaviqColor.paper.ignoresSafeArea() }
     }
@@ -232,48 +240,62 @@ private struct MessageView: View {
     var body: some View {
         if message.role == .user {
             HStack {
-                Spacer(minLength: 48)
+                Spacer(minLength: 56)
                 Text(message.text)
+                    .font(.body)
+                    .foregroundStyle(NaviqColor.onForest)
                     .padding(.horizontal, 14)
-                    .padding(.vertical, 10)
-                    .foregroundStyle(.white)
-                    .font(.system(.body, design: .rounded).weight(.semibold))
-                    .background { RoundedRectangle(cornerRadius: 22, style: .continuous).fill(NaviqColor.heroGradient) }
+                    .padding(.vertical, 11)
+                    .background { RoundedRectangle(cornerRadius: 6, style: .continuous).fill(NaviqColor.forest) }
             }
             .accessibilityLabel("You said: \(message.text)")
         } else {
-            VStack(alignment: .leading, spacing: NaviqSpacing.s) {
-                HStack(spacing: 6) {
+            // Saathi speaks in serif beside a left rule; errors use the warm signal.
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 8) {
                     NaviqMark(size: 14)
-                    Text(message.isError ? "Saathi · unavailable" : "Saathi").kickerStyle(message.isError ? NaviqColor.coral : NaviqColor.inkTertiary)
+                    Text(message.isError ? "Saathi · unavailable" : "Saathi").eyebrowStyle(message.isError ? NaviqColor.coral : NaviqColor.inkSecondary)
                 }
                 Text(LocalizedStringKey(message.text))
+                    .font(.system(.body, design: .serif))
+                    .lineSpacing(3)
                     .foregroundStyle(message.isError ? NaviqColor.coral : NaviqColor.ink)
                     .textSelection(.enabled)
                 if !message.citations.isEmpty {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("Sources").kickerStyle()
-                        ForEach(message.citations) { c in
+                    VStack(alignment: .leading, spacing: 0) {
+                        Text("Sources from your data").eyebrowStyle().padding(.bottom, 6)
+                        ForEach(Array(message.citations.enumerated()), id: \.element.id) { i, c in
+                            if i > 0 { Hairline() }
                             NavigationLink(value: OpportunityLink(id: c.opportunityId)) {
-                                HStack(spacing: 6) {
+                                HStack(spacing: 10) {
+                                    Text(String(format: "%02d", i + 1)).font(.caption.weight(.semibold).monospacedDigit()).foregroundStyle(NaviqColor.accent)
+                                    Text(c.title).font(.footnote.weight(.semibold)).foregroundStyle(NaviqColor.ink).multilineTextAlignment(.leading)
+                                    Spacer(minLength: 6)
                                     Image(systemName: c.verificationStatus == "verified" ? "checkmark.seal" : "exclamationmark.triangle")
+                                        .font(.footnote)
                                         .foregroundStyle(c.verificationStatus == "verified" ? NaviqColor.jade : NaviqColor.amber)
-                                    Text(c.title).font(.footnote.weight(.semibold)).foregroundStyle(NaviqColor.accent).multilineTextAlignment(.leading)
+                                        .accessibilityLabel(c.verificationStatus == "verified" ? "Verified" : "Not verified")
                                 }
+                                .padding(.vertical, 9)
                             }
                         }
                     }
-                    .padding(.top, 4)
+                    .padding(.top, 2)
                 }
                 ForEach(message.actions) { action in
                     ActionCard(action: action, state: actionStates[action.id] ?? .pending, onConfirm: { onConfirm(action) }, onDismiss: { onDismiss(action) })
                 }
             }
-            .naviqCard(padding: 14, radius: 22)
+            .padding(.leading, 14)
+            .overlay(alignment: .leading) {
+                Rectangle().fill(message.isError ? NaviqColor.warm : NaviqColor.forest.opacity(0.35)).frame(width: 2)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 }
 
+/// A proposed action: outlined, never implies anything was done until confirmed.
 private struct ActionCard: View {
     let action: ProposedAction
     let state: SaathiModel.ActionState
@@ -281,20 +303,20 @@ private struct ActionCard: View {
     let onDismiss: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Suggested action · needs your OK").kickerStyle(NaviqColor.accent)
-            Text(action.label).font(.headline).foregroundStyle(NaviqColor.ink)
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Suggested action · needs your OK").eyebrowStyle(NaviqColor.accent)
+            Text(action.label).itemTitleStyle().foregroundStyle(NaviqColor.ink)
             if let next = action.nextAction { Text("Next step: \(next)").font(.footnote).foregroundStyle(NaviqColor.inkSecondary) }
             switch state {
             case .pending:
-                HStack {
-                    Button("Confirm", action: onConfirm).buttonStyle(.borderedProminent).tint(NaviqColor.accent)
-                    Button("Not now", action: onDismiss).buttonStyle(.bordered).tint(NaviqColor.inkSecondary)
+                HStack(spacing: 10) {
+                    Button("Confirm", action: onConfirm).buttonStyle(PrimaryButtonStyle())
+                    Button("Not now", action: onDismiss).buttonStyle(SecondaryButtonStyle())
                 }
             case .running:
                 ProgressView()
             case .done(let m):
-                Label(m, systemImage: "checkmark.circle.fill").font(.footnote).foregroundStyle(NaviqColor.jade)
+                Label(m, systemImage: "checkmark.circle").font(.footnote).foregroundStyle(NaviqColor.jade)
             case .failed(let m):
                 Label(m, systemImage: m == "Dismissed" ? "xmark" : "exclamationmark.triangle").font(.footnote)
                     .foregroundStyle(m == "Dismissed" ? NaviqColor.inkTertiary : NaviqColor.coral)
@@ -302,6 +324,6 @@ private struct ActionCard: View {
         }
         .padding(NaviqSpacing.l)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background { RoundedRectangle(cornerRadius: 16, style: .continuous).fill(NaviqColor.accentSoft) }
+        .overlay { RoundedRectangle(cornerRadius: NaviqSpacing.radius, style: .continuous).strokeBorder(NaviqColor.accent.opacity(0.6), lineWidth: 1) }
     }
 }
