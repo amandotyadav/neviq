@@ -112,7 +112,7 @@ struct EligibilityReportView: View {
                     }
                     if let excerpt = c.sourceExcerpt {
                         Text("“\(excerpt)”")
-                            .font(.system(.footnote, design: .serif).italic())
+                            .font(.system(.footnote, design: .rounded).italic())
                             .foregroundStyle(NaviqColor.inkSecondary)
                             .padding(.leading, 10)
                             .overlay(alignment: .leading) { Rectangle().fill(NaviqColor.rule).frame(width: 2) }

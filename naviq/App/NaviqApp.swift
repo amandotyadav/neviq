@@ -74,7 +74,7 @@ struct MainTabView: View {
         TabView(selection: $router.tab) {
             Tab("Home", systemImage: "safari", value: AppRouter.Tab.home) { HomeView() }
             Tab("Discover", systemImage: "magnifyingglass", value: AppRouter.Tab.discover) { DiscoverView() }
-            Tab("Saathi", systemImage: "bubble.left.and.text.bubble.right", value: AppRouter.Tab.saathi) { SaathiView() }
+            Tab("Saathi", systemImage: "message.fill", value: AppRouter.Tab.saathi) { SaathiView() }
             Tab("Roadmap", systemImage: "point.topright.arrow.triangle.backward.to.point.bottomleft.scurvepath", value: AppRouter.Tab.roadmap) { RoadmapView() }
             Tab("Applications", systemImage: "tray.full", value: AppRouter.Tab.applications) { ApplicationsView() }
         }

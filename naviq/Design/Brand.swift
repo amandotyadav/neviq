@@ -44,7 +44,7 @@ private struct NeedleShape: Shape {
 /// Wordmark: lowercase serif "naviq" paired with the mark.
 struct NaviqWordmark: View {
     var markSize: CGFloat = 26
-    var font: Font = .system(.title2, design: .serif).weight(.semibold)
+    var font: Font = .system(.title2, design: .rounded).weight(.semibold)
 
     var body: some View {
         HStack(spacing: 8) {

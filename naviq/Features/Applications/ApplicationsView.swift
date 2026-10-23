@@ -109,7 +109,7 @@ struct ApplicationsView: View {
             SectionHeader(kicker: title) { Text("\(apps.count)").font(.caption.monospacedDigit()).foregroundStyle(NaviqColor.inkTertiary) }
             ForEach(apps) { app in
                 Button { selected = app } label: { ApplicationRow(app: app) }.buttonStyle(.plain)
-                Hairline()
+                    .padding(.top, NaviqSpacing.m)
             }
         }
     }
@@ -123,10 +123,7 @@ private struct ApplicationRow: View {
             if let d = app.deadline, app.status.isPreApply {
                 Dateline(date: d, tint: Dates.daysUntil(d) <= 7 ? NaviqColor.coral : NaviqColor.ink)
             } else {
-                Image(systemName: app.status.symbol)
-                    .font(.title3)
-                    .foregroundStyle(NaviqColor.inkSecondary)
-                    .frame(width: 44)
+                IconBadge(systemImage: app.status.symbol, fill: app.status == .offer ? NaviqColor.mint : NaviqColor.lilac, size: 50)
             }
             VStack(alignment: .leading, spacing: 4) {
                 Text(app.title).font(NaviqFont.cardTitle).foregroundStyle(NaviqColor.ink).multilineTextAlignment(.leading)
@@ -142,9 +139,9 @@ private struct ApplicationRow: View {
                 }
             }
             Spacer(minLength: 0)
-            Image(systemName: "chevron.right").font(.footnote).foregroundStyle(NaviqColor.inkTertiary)
+            Image(systemName: "chevron.right").font(.footnote.weight(.bold)).foregroundStyle(NaviqColor.inkTertiary)
         }
-        .padding(.vertical, NaviqSpacing.m)
+        .naviqCard()
         .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
     }

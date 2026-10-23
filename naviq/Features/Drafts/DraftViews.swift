@@ -212,7 +212,7 @@ struct DraftEditorBody: View {
                         Text(draft.reviewedAt == nil ? "I've reviewed this — save" : "Save changes")
                     }
                 }
-                .buttonStyle(PrimaryButtonStyle(tint: NaviqColor.ink))
+                .buttonStyle(PrimaryButtonStyle())
                 .disabled(saving)
 
                 HStack(spacing: NaviqSpacing.m) {

@@ -148,8 +148,7 @@ struct SaathiView: View {
                     .focused($inputFocused)
                     .padding(.horizontal, 14)
                     .padding(.vertical, 10)
-                    .background { RoundedRectangle(cornerRadius: 20).fill(NaviqColor.surface) }
-                    .overlay { RoundedRectangle(cornerRadius: 20).strokeBorder(NaviqColor.rule) }
+                    .background { RoundedRectangle(cornerRadius: 22, style: .continuous).fill(NaviqColor.surface) }
                     .submitLabel(.send)
                     .onSubmit(sendInput)
                     .disabled(model.aiAvailable == false)
@@ -158,7 +157,7 @@ struct SaathiView: View {
                         .font(.body.weight(.bold))
                         .frame(width: 40, height: 40)
                         .foregroundStyle(NaviqColor.onAccent)
-                        .background { Circle().fill(canSend ? NaviqColor.ink : NaviqColor.rule) }
+                        .background { Circle().fill(canSend ? NaviqColor.accent : NaviqColor.rule) }
                 }
                 .disabled(!canSend)
                 .accessibilityLabel("Send")
@@ -237,8 +236,9 @@ private struct MessageView: View {
                 Text(message.text)
                     .padding(.horizontal, 14)
                     .padding(.vertical, 10)
-                    .foregroundStyle(NaviqColor.paper)
-                    .background { RoundedRectangle(cornerRadius: 18).fill(NaviqColor.ink) }
+                    .foregroundStyle(.white)
+                    .font(.system(.body, design: .rounded).weight(.semibold))
+                    .background { RoundedRectangle(cornerRadius: 22, style: .continuous).fill(NaviqColor.heroGradient) }
             }
             .accessibilityLabel("You said: \(message.text)")
         } else {
@@ -269,7 +269,7 @@ private struct MessageView: View {
                     ActionCard(action: action, state: actionStates[action.id] ?? .pending, onConfirm: { onConfirm(action) }, onDismiss: { onDismiss(action) })
                 }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .naviqCard(padding: 14, radius: 22)
         }
     }
 }
@@ -288,7 +288,7 @@ private struct ActionCard: View {
             switch state {
             case .pending:
                 HStack {
-                    Button("Confirm", action: onConfirm).buttonStyle(.borderedProminent).tint(NaviqColor.ink)
+                    Button("Confirm", action: onConfirm).buttonStyle(.borderedProminent).tint(NaviqColor.accent)
                     Button("Not now", action: onDismiss).buttonStyle(.bordered).tint(NaviqColor.inkSecondary)
                 }
             case .running:
@@ -302,7 +302,6 @@ private struct ActionCard: View {
         }
         .padding(NaviqSpacing.l)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background { RoundedRectangle(cornerRadius: 14).fill(NaviqColor.surface) }
-        .overlay { RoundedRectangle(cornerRadius: 14).strokeBorder(NaviqColor.accent.opacity(0.4)) }
+        .background { RoundedRectangle(cornerRadius: 16, style: .continuous).fill(NaviqColor.accentSoft) }
     }
 }

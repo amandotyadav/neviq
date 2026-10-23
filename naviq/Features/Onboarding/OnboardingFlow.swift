@@ -73,16 +73,17 @@ struct OnboardingFlow: View {
         .padding(.top, NaviqSpacing.m)
         .overlay(alignment: .bottom) {
             GeometryReader { geo in
-                Rectangle().fill(NaviqColor.rule).frame(height: 2)
+                Capsule().fill(NaviqColor.surfaceSunken).frame(height: 8)
                     .overlay(alignment: .leading) {
-                        Rectangle().fill(NaviqColor.coral)
-                            .frame(width: geo.size.width * CGFloat(step.rawValue + 1) / CGFloat(Step.allCases.count), height: 2)
+                        Capsule().fill(NaviqColor.accent)
+                            .frame(width: geo.size.width * CGFloat(step.rawValue + 1) / CGFloat(Step.allCases.count), height: 8)
+                            .animation(.smooth, value: step)
                     }
             }
-            .frame(height: 2)
-            .offset(y: 12)
+            .frame(height: 8)
+            .offset(y: 14)
         }
-        .padding(.bottom, NaviqSpacing.l)
+        .padding(.bottom, NaviqSpacing.xl)
     }
 
     private var footer: some View {
@@ -101,7 +102,7 @@ struct OnboardingFlow: View {
                 } label: {
                     if isSaving { ProgressView().tint(NaviqColor.onAccent) } else { Text(step == .preferences ? "Finish" : "Continue") }
                 }
-                .buttonStyle(PrimaryButtonStyle(tint: NaviqColor.ink))
+                .buttonStyle(PrimaryButtonStyle())
                 .disabled(isSaving || draft.cgpaInvalid)
             }
             Button("Skip for now — finish later in Profile") { finish() }

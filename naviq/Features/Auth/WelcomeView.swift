@@ -7,63 +7,87 @@ struct WelcomeView: View {
     enum AuthMode: String, Identifiable { case signIn, register; var id: String { rawValue } }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 0) {
-                NaviqWordmark(markSize: 30)
+        ZStack {
+            NaviqColor.heroGradient.ignoresSafeArea()
+            Circle().fill(.white.opacity(0.10)).frame(width: 340).offset(x: 150, y: -300)
+            Circle().fill(NaviqColor.sunny.opacity(0.25)).frame(width: 220).offset(x: -170, y: 330)
+
+            ScrollView {
+                VStack(alignment: .leading, spacing: 0) {
+                    HStack(spacing: 8) {
+                        NaviqMark(size: 30, ink: .white, accent: NaviqColor.sunny)
+                        Text("naviq").font(.system(.title2, design: .rounded).weight(.heavy)).foregroundStyle(.white)
+                    }
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel("Naviq")
                     .padding(.top, NaviqSpacing.xl)
 
-                Spacer(minLength: 56)
+                    Spacer(minLength: 24)
 
-                Text("Your future,\nbetter navigated.")
-                    .font(.system(size: 44, weight: .semibold, design: .serif))
-                    .minimumScaleFactor(0.6)
-                    .foregroundStyle(NaviqColor.ink)
-                    .accessibilityAddTraits(.isHeader)
+                    Text("Your future,\nbetter navigated.")
+                        .font(.system(size: 40, weight: .heavy, design: .rounded))
+                        .minimumScaleFactor(0.6)
+                        .foregroundStyle(.white)
+                        .accessibilityAddTraits(.isHeader)
 
-                Text("Scholarships, internships, fellowships and campus notices — checked against official sources, matched to you, and turned into a plan.")
-                    .font(.title3)
-                    .foregroundStyle(NaviqColor.inkSecondary)
-                    .padding(.top, NaviqSpacing.l)
+                    Text("Scholarships, internships, fellowships and campus notices — checked against official sources, matched to you, and turned into a plan.")
+                        .font(.system(.title3, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.92))
+                        .padding(.top, NaviqSpacing.l)
 
-                VStack(alignment: .leading, spacing: NaviqSpacing.m) {
-                    promise("01", "Discover", "Verified opportunities with their official source.")
-                    promise("02", "Find your direction", "See what you meet, what you're missing, and why.")
-                    promise("03", "Make your next move", "Roadmaps, drafts, and deadlines in one place.")
+                    VStack(spacing: NaviqSpacing.m) {
+                        promise("magnifyingglass", NaviqColor.sunny, "Discover", "Verified opportunities with their official source.")
+                        promise("safari.fill", NaviqColor.mint, "Find your direction", "See what you meet, what you're missing, and why.")
+                        promise("bolt.fill", NaviqColor.blush, "Make your next move", "Roadmaps, drafts, and deadlines in one place.")
+                    }
+                    .padding(.top, NaviqSpacing.xl)
+
+                    if let notice = session.notice {
+                        NoticeBanner(text: notice, tone: .info).padding(.top, NaviqSpacing.xl)
+                    }
+
                 }
-                .padding(.top, NaviqSpacing.xxl)
-
-                if let notice = session.notice {
-                    NoticeBanner(text: notice, tone: .info).padding(.top, NaviqSpacing.xl)
-                }
-
-                VStack(spacing: NaviqSpacing.m) {
-                    Button("Create your account") { mode = .register }
-                        .buttonStyle(PrimaryButtonStyle(tint: NaviqColor.ink))
-                    Button("I already have an account") { mode = .signIn }
-                        .buttonStyle(SecondaryButtonStyle())
-                }
-                .padding(.top, NaviqSpacing.xxl)
-                .padding(.bottom, NaviqSpacing.xl)
+                .padding(.horizontal, NaviqSpacing.page)
             }
-            .padding(.horizontal, NaviqSpacing.page)
         }
-        .naviqPage()
+        .safeAreaInset(edge: .bottom) {
+            VStack(spacing: NaviqSpacing.m) {
+                        Button { mode = .register } label: {
+                            Text("Create your account")
+                                .font(.system(.body, design: .rounded).weight(.heavy))
+                                .frame(maxWidth: .infinity, minHeight: 56)
+                                .foregroundStyle(Color(UIColor(hex: 0x17153B)))
+                                .background { RoundedRectangle(cornerRadius: 18, style: .continuous).fill(NaviqColor.sunny) }
+                        }
+                        Button { mode = .signIn } label: {
+                            Text("I already have an account")
+                                .font(.system(.body, design: .rounded).weight(.bold))
+                                .frame(maxWidth: .infinity, minHeight: 56)
+                                .foregroundStyle(.white)
+                                .background { RoundedRectangle(cornerRadius: 18, style: .continuous).fill(.white.opacity(0.18)) }
+                        }
+                    }
+            .padding(.horizontal, NaviqSpacing.page)
+            .padding(.top, NaviqSpacing.m)
+            .padding(.bottom, NaviqSpacing.s)
+        }
         .sheet(item: $mode) { mode in
             AuthFormView(mode: mode)
                 .presentationDragIndicator(.visible)
         }
     }
 
-    private func promise(_ number: String, _ title: String, _ detail: String) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: NaviqSpacing.m) {
-            Text(number)
-                .font(.system(.footnote, design: .serif).weight(.bold).monospacedDigit())
-                .foregroundStyle(NaviqColor.coral)
+    private func promise(_ symbol: String, _ color: Color, _ title: String, _ detail: String) -> some View {
+        HStack(spacing: NaviqSpacing.m) {
+            IconBadge(systemImage: symbol, fill: color, foreground: Color(UIColor(hex: 0x17153B)), size: 46)
             VStack(alignment: .leading, spacing: 2) {
-                Text(title).font(.headline).foregroundStyle(NaviqColor.ink)
-                Text(detail).font(.subheadline).foregroundStyle(NaviqColor.inkSecondary)
+                Text(title).font(.system(.headline, design: .rounded).weight(.heavy)).foregroundStyle(.white)
+                Text(detail).font(.system(.subheadline, design: .rounded)).foregroundStyle(.white.opacity(0.88))
             }
+            Spacer(minLength: 0)
         }
+        .padding(NaviqSpacing.m)
+        .background { RoundedRectangle(cornerRadius: 20, style: .continuous).fill(.white.opacity(0.14)) }
         .accessibilityElement(children: .combine)
     }
 }
@@ -133,7 +157,7 @@ struct AuthFormView: View {
                     } label: {
                         if isSubmitting { ProgressView().tint(NaviqColor.onAccent) } else { Text(isRegister ? "Create account" : "Sign in") }
                     }
-                    .buttonStyle(PrimaryButtonStyle(tint: NaviqColor.ink))
+                    .buttonStyle(PrimaryButtonStyle())
                     .disabled(!canSubmit)
                     .padding(.top, NaviqSpacing.s)
 

@@ -87,17 +87,17 @@ struct RoadmapView: View {
     private var emptyState: some View {
         VStack(alignment: .leading, spacing: NaviqSpacing.l) {
             Text("A plan you can actually follow.")
-                .font(NaviqFont.title)
+                .font(NaviqFont.headline)
                 .foregroundStyle(NaviqColor.ink)
             Text("Saathi turns your goal and profile into milestones with concrete steps. Or add your own — your roadmap works without AI.")
                 .foregroundStyle(NaviqColor.inkSecondary)
             if model.aiAvailable == false {
                 Button("Add your first milestone") { showAdd = true }
-                    .buttonStyle(PrimaryButtonStyle(tint: NaviqColor.ink))
+                    .buttonStyle(PrimaryButtonStyle())
                 NoticeBanner(text: "Saathi AI isn't configured on this server, so AI-generated roadmaps are unavailable. Manual milestones work fully.", tone: .info)
             } else {
                 Button { showGenerate = true } label: { Label("Generate with Saathi", systemImage: "sparkles") }
-                    .buttonStyle(PrimaryButtonStyle(tint: NaviqColor.ink))
+                    .buttonStyle(PrimaryButtonStyle())
                 Button("Add a milestone myself") { showAdd = true }
                     .buttonStyle(SecondaryButtonStyle())
             }
@@ -119,12 +119,13 @@ struct RoadmapView: View {
                 }
             }
             VStack(alignment: .leading, spacing: 6) {
-                ProgressView(value: Double(r.progress.completed), total: Double(max(r.progress.total, 1)))
-                    .tint(NaviqColor.jade)
-                    .animation(.smooth, value: r.progress.completed)
-                Text("\(r.progress.completed) of \(r.progress.total) milestones complete")
-                    .font(.footnote.monospacedDigit())
-                    .foregroundStyle(NaviqColor.inkSecondary)
+                HStack(spacing: NaviqSpacing.l) {
+                    ProgressRing(completed: r.progress.completed, total: r.progress.total)
+                    Text("\(r.progress.completed) of \(r.progress.total) milestones complete")
+                        .font(NaviqFont.cardTitle)
+                        .foregroundStyle(NaviqColor.ink)
+                }
+                .naviqCard()
             }
             .accessibilityElement(children: .combine)
 
@@ -156,13 +157,12 @@ private struct MilestoneRow: View {
         HStack(alignment: .top, spacing: NaviqSpacing.m) {
             VStack(spacing: 0) {
                 ZStack {
-                    Circle().fill(done ? NaviqColor.jade : NaviqColor.paper).frame(width: 26, height: 26)
-                    Circle().strokeBorder(done ? NaviqColor.jade : milestone.status == "in_progress" ? NaviqColor.accent : NaviqColor.ink.opacity(0.5), lineWidth: 1.5)
-                        .frame(width: 26, height: 26)
+                    Circle().fill(done ? NaviqColor.jade : NaviqColor.surfaceSunken).frame(width: 30, height: 30)
+                    Circle().strokeBorder(done ? NaviqColor.jade : milestone.status == "in_progress" ? NaviqColor.accent : Color.clear, lineWidth: 2.5)
+                        .frame(width: 30, height: 30)
                     if done { Image(systemName: "checkmark").font(.caption.weight(.bold)).foregroundStyle(NaviqColor.paper) }
                     else { Text("\(index)").font(.caption.weight(.bold).monospacedDigit()).foregroundStyle(NaviqColor.ink) }
                 }
-                if !isLast { Rectangle().fill(NaviqColor.rule).frame(width: 1.5).frame(maxHeight: .infinity) }
             }
             .accessibilityHidden(true)
 
@@ -203,7 +203,7 @@ private struct MilestoneRow: View {
                             }
                         }
                         .buttonStyle(.borderedProminent)
-                        .tint(milestone.status == "in_progress" ? NaviqColor.jade : NaviqColor.ink)
+                        .tint(milestone.status == "in_progress" ? NaviqColor.jade : NaviqColor.accent)
                     }
                     Menu {
                         if done { Button("Reopen") { Task { await model.update(milestone, ["status": "in_progress"]) } } }
@@ -223,9 +223,10 @@ private struct MilestoneRow: View {
                     }
                     .accessibilityLabel("More actions for \(milestone.title)")
                 }
-                .padding(.bottom, NaviqSpacing.xl)
             }
         }
+        .naviqCard()
+        .padding(.bottom, NaviqSpacing.m)
         .sheet(isPresented: $showDate) {
             NavigationStack {
                 DatePicker("Target date", selection: $date, in: Date.now..., displayedComponents: .date)

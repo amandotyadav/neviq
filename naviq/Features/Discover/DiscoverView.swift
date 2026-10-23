@@ -60,7 +60,6 @@ struct DiscoverView: View {
 
                     typeStrip.padding(.bottom, NaviqSpacing.m)
                     resultsHeader
-                    Hairline().padding(.top, 8)
                     results
                     officialPortals.padding(.top, NaviqSpacing.xxl)
                 }
@@ -97,7 +96,7 @@ struct DiscoverView: View {
                     .buttonStyle(.plain)
                 ForEach(OpportunityType.allCases) { t in
                     Button { model.query.type = model.query.type == t ? nil : t } label: {
-                        Chip(text: t.label, selected: model.query.type == t, systemImage: t.symbol)
+                        Chip(text: t.label, selected: model.query.type == t, systemImage: t.symbol, fill: NaviqColor.block(for: t.rawValue))
                     }
                     .buttonStyle(.plain)
                 }
@@ -154,8 +153,8 @@ struct DiscoverView: View {
             ForEach(model.items) { opp in
                 NavigationLink(value: OpportunityLink(id: opp.id)) { OpportunityRow(opportunity: opp) }
                     .buttonStyle(.plain)
+                    .padding(.top, NaviqSpacing.m)
                     .onAppear { if opp.id == model.items.last?.id { Task { await model.loadMore() } } }
-                Hairline()
             }
             if let err = model.loadMoreError {
                 NoticeBanner(text: err).padding(.top, NaviqSpacing.m)
@@ -176,6 +175,7 @@ struct DiscoverView: View {
             portal("AICTE National Internship Portal", "internship.aicte-india.org", "https://internship.aicte-india.org/")
             portal("National Career Service", "ncs.gov.in", "https://www.ncs.gov.in/")
         }
+        .naviqCard()
     }
 
     private func portal(_ name: String, _ host: String, _ url: String) -> some View {
@@ -186,9 +186,9 @@ struct DiscoverView: View {
                     Text(host).font(.caption).foregroundStyle(NaviqColor.inkTertiary)
                 }
                 Spacer()
-                Image(systemName: "arrow.up.right.square").foregroundStyle(NaviqColor.accent)
+                Image(systemName: "arrow.up.right.circle.fill").foregroundStyle(NaviqColor.accent)
             }
-            .padding(.vertical, 8)
+            .padding(.vertical, 6)
         }
         .accessibilityHint("Opens the official website")
     }

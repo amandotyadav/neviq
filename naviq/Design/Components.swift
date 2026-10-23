@@ -17,25 +17,30 @@ struct PrimaryButtonStyle: ButtonStyle {
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.body.weight(.semibold))
-            .frame(maxWidth: .infinity, minHeight: 50)
+            .font(.system(.body, design: .rounded).weight(.bold))
+            .frame(maxWidth: .infinity, minHeight: 54)
             .padding(.horizontal, NaviqSpacing.l)
             .foregroundStyle(NaviqColor.onAccent)
-            .background { Capsule().fill(tint.opacity(isEnabled ? 1 : 0.4)) }
-            .scaleEffect(configuration.isPressed ? 0.98 : 1)
-            .animation(.spring(duration: 0.25), value: configuration.isPressed)
+            .background {
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .fill(tint.opacity(isEnabled ? 1 : 0.35))
+                    .shadow(color: tint.opacity(isEnabled ? 0.35 : 0), radius: 10, y: 5)
+            }
+            .scaleEffect(configuration.isPressed ? 0.97 : 1)
+            .animation(.spring(duration: 0.25, bounce: 0.4), value: configuration.isPressed)
     }
 }
 
 struct SecondaryButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.body.weight(.semibold))
-            .frame(maxWidth: .infinity, minHeight: 50)
+            .font(.system(.body, design: .rounded).weight(.bold))
+            .frame(maxWidth: .infinity, minHeight: 54)
             .padding(.horizontal, NaviqSpacing.l)
-            .foregroundStyle(NaviqColor.ink)
-            .background { Capsule().strokeBorder(NaviqColor.ink.opacity(0.8), lineWidth: 1.2) }
-            .opacity(configuration.isPressed ? 0.7 : 1)
+            .foregroundStyle(NaviqColor.accent)
+            .background { RoundedRectangle(cornerRadius: 18, style: .continuous).fill(NaviqColor.accentSoft) }
+            .scaleEffect(configuration.isPressed ? 0.97 : 1)
+            .animation(.spring(duration: 0.25, bounce: 0.4), value: configuration.isPressed)
     }
 }
 
@@ -51,7 +56,7 @@ struct InlineLink: View {
                 Text(title)
                 Image(systemName: systemImage).imageScale(.small)
             }
-            .font(.subheadline.weight(.semibold))
+            .font(.system(.subheadline, design: .rounded).weight(.bold))
             .foregroundStyle(NaviqColor.accent)
         }
         .buttonStyle(.plain)
@@ -66,18 +71,18 @@ struct SectionHeader<Trailing: View>: View {
     @ViewBuilder var trailing: () -> Trailing
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 2) {
             HStack(alignment: .firstTextBaseline) {
-                Text(kicker).kickerStyle()
+                Text(kicker)
+                    .font(.system(.title3, design: .rounded).weight(.heavy))
+                    .foregroundStyle(NaviqColor.ink)
                 Spacer()
                 trailing()
             }
-            Rectangle().fill(NaviqColor.ink).frame(height: 1.5)
             if let title {
                 Text(title)
-                    .font(NaviqFont.headline)
-                    .foregroundStyle(NaviqColor.ink)
-                    .padding(.top, 4)
+                    .font(NaviqFont.callout)
+                    .foregroundStyle(NaviqColor.inkSecondary)
             }
         }
         .accessibilityElement(children: .contain)
@@ -93,8 +98,26 @@ extension SectionHeader where Trailing == EmptyView {
     }
 }
 
+/// Soft divider used inside cards.
 struct Hairline: View {
-    var body: some View { Rectangle().fill(NaviqColor.rule).frame(height: 1) }
+    var body: some View { Rectangle().fill(NaviqColor.rule.opacity(0.7)).frame(height: 1) }
+}
+
+/// Round icon on a colour block.
+struct IconBadge: View {
+    let systemImage: String
+    var fill: Color = NaviqColor.accentSoft
+    var foreground: Color = NaviqColor.ink
+    var size: CGFloat = 44
+
+    var body: some View {
+        Image(systemName: systemImage)
+            .font(.system(size: size * 0.42, weight: .bold))
+            .foregroundStyle(foreground)
+            .frame(width: size, height: size)
+            .background { RoundedRectangle(cornerRadius: size * 0.34, style: .continuous).fill(fill) }
+            .accessibilityHidden(true)
+    }
 }
 
 // MARK: - Labels
@@ -189,18 +212,24 @@ struct DeadlineLabel: View {
     }
 }
 
-/// Editorial dateline: large serif day over a small-caps month.
+/// Calendar tile: big day over the month on a colour block.
 struct Dateline: View {
     let date: Date
     var tint: Color = NaviqColor.ink
+    var fill: Color = NaviqColor.sunny
 
     var body: some View {
         let parts = Dates.dayMonth(date)
         VStack(spacing: 0) {
-            Text(parts.day).font(NaviqFont.numeral).foregroundStyle(tint)
-            Text(parts.month).font(.caption2.weight(.bold)).tracking(1).foregroundStyle(tint.opacity(0.8))
+            Text(parts.day).font(.system(.title2, design: .rounded).weight(.heavy).monospacedDigit())
+            Text(parts.month).font(.system(.caption2, design: .rounded).weight(.heavy))
         }
-        .frame(minWidth: 44)
+        .foregroundStyle(NaviqColor.ink)
+        .frame(width: 54, height: 58)
+        .background { RoundedRectangle(cornerRadius: 16, style: .continuous).fill(tint == NaviqColor.coral ? NaviqColor.coralSoft : fill) }
+        .overlay(alignment: .top) {
+            if tint == NaviqColor.coral { Capsule().fill(NaviqColor.coral).frame(width: 22, height: 4).offset(y: -2) }
+        }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(date.formatted(date: .long, time: .omitted))
     }
@@ -211,9 +240,9 @@ struct StatusBadge: View {
 
     var body: some View {
         Label(status.label, systemImage: status.symbol)
-            .font(.caption.weight(.semibold))
+            .font(.system(.caption, design: .rounded).weight(.bold))
             .padding(.horizontal, 10)
-            .padding(.vertical, 5)
+            .padding(.vertical, 6)
             .foregroundStyle(foreground)
             .background { Capsule().fill(background) }
     }
@@ -274,20 +303,21 @@ struct Chip: View {
     let text: String
     var selected = false
     var systemImage: String?
+    var fill: Color?
 
     var body: some View {
-        HStack(spacing: 4) {
+        HStack(spacing: 5) {
             if let systemImage { Image(systemName: systemImage).imageScale(.small) }
             Text(text)
         }
-        .font(.subheadline.weight(selected ? .semibold : .regular))
-        .padding(.horizontal, 12)
-        .padding(.vertical, 7)
+        .font(.system(.subheadline, design: .rounded).weight(selected ? .bold : .semibold))
+        .padding(.horizontal, 14)
+        .padding(.vertical, 9)
         .foregroundStyle(selected ? NaviqColor.onAccent : NaviqColor.ink)
         .background {
-            Capsule().fill(selected ? NaviqColor.ink : NaviqColor.surface)
+            Capsule().fill(selected ? NaviqColor.accent : (fill ?? NaviqColor.surface))
+                .shadow(color: .black.opacity(selected || fill != nil ? 0 : 0.05), radius: 4, y: 2)
         }
-        .overlay { Capsule().strokeBorder(selected ? Color.clear : NaviqColor.rule, lineWidth: 1) }
         .accessibilityAddTraits(selected ? .isSelected : [])
     }
 }
@@ -318,9 +348,8 @@ struct TokenEditor: View {
                 .textInputAutocapitalization(.words)
                 .submitLabel(.done)
                 .onSubmit(add)
-                .padding(12)
-                .background { RoundedRectangle(cornerRadius: 10).fill(NaviqColor.surface) }
-                .overlay { RoundedRectangle(cornerRadius: 10).strokeBorder(NaviqColor.rule) }
+                .padding(14)
+                .background { RoundedRectangle(cornerRadius: 16, style: .continuous).fill(NaviqColor.surface) }
             let remaining = suggestions.filter { s in !tokens.contains { $0.caseInsensitiveCompare(s) == .orderedSame } }
             if !remaining.isEmpty {
                 FlowLayout {
@@ -357,8 +386,10 @@ struct EmptyStateView: View {
     var body: some View {
         VStack(spacing: NaviqSpacing.m) {
             Image(systemName: symbol)
-                .font(.system(size: 34, weight: .light))
-                .foregroundStyle(NaviqColor.inkTertiary)
+                .font(.system(size: 34, weight: .semibold))
+                .foregroundStyle(NaviqColor.accent)
+                .frame(width: 76, height: 76)
+                .background { Circle().fill(NaviqColor.accentSoft) }
             Text(title)
                 .font(NaviqFont.headline)
                 .foregroundStyle(NaviqColor.ink)
@@ -374,9 +405,10 @@ struct EmptyStateView: View {
                     .padding(.top, 4)
             }
         }
-        .padding(.vertical, NaviqSpacing.xxl)
+        .padding(.vertical, NaviqSpacing.xl)
         .padding(.horizontal, NaviqSpacing.xl)
         .frame(maxWidth: .infinity)
+        .background { RoundedRectangle(cornerRadius: NaviqSpacing.radius, style: .continuous).fill(NaviqColor.surface) }
     }
 }
 
@@ -422,7 +454,7 @@ struct NoticeBanner: View {
         .foregroundStyle(tone == .error ? NaviqColor.coral : tone == .success ? NaviqColor.jade : NaviqColor.accent)
         .padding(12)
         .background {
-            RoundedRectangle(cornerRadius: 12)
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .fill(tone == .error ? NaviqColor.coralSoft : tone == .success ? NaviqColor.jadeSoft : NaviqColor.accentSoft)
         }
         .accessibilityElement(children: .combine)
@@ -470,8 +502,8 @@ struct LabeledField<Content: View>: View {
             Text(label).kickerStyle()
             content()
                 .padding(12)
-                .background { RoundedRectangle(cornerRadius: 10).fill(NaviqColor.surface) }
-                .overlay { RoundedRectangle(cornerRadius: 10).strokeBorder(error == nil ? NaviqColor.rule : NaviqColor.coral) }
+                .background { RoundedRectangle(cornerRadius: 16, style: .continuous).fill(NaviqColor.surface) }
+                .overlay { RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(error == nil ? NaviqColor.rule : NaviqColor.coral, lineWidth: error == nil ? 1 : 1.5) }
             if let error {
                 Text(error).font(.footnote).foregroundStyle(NaviqColor.coral)
             } else if let hint {

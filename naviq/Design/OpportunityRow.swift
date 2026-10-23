@@ -1,76 +1,90 @@
 import SwiftUI
 
-/// Editorial index row for an opportunity: type kicker, serif title,
-/// organisation, verified facts, and the top "why it matches" reason.
+/// Opportunity card: a colour block per category, bold title, the verified
+/// facts, and the top "why it matches" reason.
 struct OpportunityRow: View {
     let opportunity: Opportunity
     var index: Int?
     var showReason = true
 
+    private var type: OpportunityType? { OpportunityType(rawValue: opportunity.opportunityType) }
+    private var block: Color { NaviqColor.block(for: opportunity.opportunityType) }
+
     var body: some View {
-        HStack(alignment: .top, spacing: NaviqSpacing.m) {
-            if let index {
-                Text(String(format: "%02d", index))
-                    .font(.system(.callout, design: .serif).weight(.semibold).monospacedDigit())
-                    .foregroundStyle(NaviqColor.inkTertiary)
-                    .frame(width: 26, alignment: .leading)
-                    .accessibilityHidden(true)
-            }
-            VStack(alignment: .leading, spacing: 6) {
-                HStack(spacing: 6) {
-                    Text(opportunity.typeLabel).kickerStyle(NaviqColor.accent)
-                    if opportunity.isCampus {
-                        Text("· Campus").kickerStyle(NaviqColor.coral)
-                    }
-                    Spacer(minLength: 0)
-                    if opportunity.isSaved == true {
-                        Image(systemName: "bookmark.fill")
-                            .font(.caption)
+        VStack(alignment: .leading, spacing: NaviqSpacing.m) {
+            HStack(alignment: .center, spacing: NaviqSpacing.m) {
+                IconBadge(systemImage: type?.symbol ?? "sparkles", fill: block, foreground: NaviqColor.ink, size: 46)
+                VStack(alignment: .leading, spacing: 1) {
+                    HStack(spacing: 6) {
+                        Text(opportunity.typeLabel)
+                            .font(.system(.caption, design: .rounded).weight(.heavy))
                             .foregroundStyle(NaviqColor.ink)
-                            .accessibilityLabel("Saved")
+                            .padding(.horizontal, 9)
+                            .padding(.vertical, 3)
+                            .background { Capsule().fill(block) }
+                        if opportunity.isCampus {
+                            Text("Campus")
+                                .font(.system(.caption, design: .rounded).weight(.heavy))
+                                .foregroundStyle(NaviqColor.coral)
+                        }
                     }
                 }
+                Spacer(minLength: 0)
+                if opportunity.isSaved == true {
+                    Image(systemName: "bookmark.fill")
+                        .foregroundStyle(NaviqColor.accent)
+                        .accessibilityLabel("Saved")
+                }
+            }
+
+            VStack(alignment: .leading, spacing: 3) {
                 Text(opportunity.title)
-                    .font(NaviqFont.cardTitle)
+                    .font(.system(.headline, design: .rounded).weight(.heavy))
                     .foregroundStyle(NaviqColor.ink)
                     .multilineTextAlignment(.leading)
                 Text(opportunity.organization)
-                    .font(.subheadline)
+                    .font(NaviqFont.callout)
                     .foregroundStyle(NaviqColor.inkSecondary)
+                    .multilineTextAlignment(.leading)
+            }
 
-                ViewThatFits(in: .horizontal) {
-                    HStack(spacing: NaviqSpacing.m) { metaItems }
-                    VStack(alignment: .leading, spacing: 4) { metaItems }
-                }
-                .padding(.top, 2)
-
-                if showReason, let reason {
-                    HStack(alignment: .top, spacing: 6) {
-                        Image(systemName: reason.positive ? "arrow.up.right" : "exclamationmark.circle")
-                            .foregroundStyle(reason.positive ? NaviqColor.jade : NaviqColor.amber)
-                        Text(reason.detail)
-                            .foregroundStyle(NaviqColor.inkSecondary)
+            FlowLayout(spacing: 8) {
+                factPill { DeadlineLabel(availability: opportunity.availability, deadline: opportunity.deadline) }
+                if let money = opportunity.moneyLine {
+                    factPill {
+                        Label(money, systemImage: "indianrupeesign.circle.fill")
+                            .font(NaviqFont.meta.weight(.semibold))
+                            .foregroundStyle(NaviqColor.ink)
                     }
-                    .font(.footnote)
-                    .padding(.top, 2)
                 }
+                factPill { VerificationLabel(status: opportunity.verificationStatus, lastVerifiedAt: opportunity.lastVerifiedAt, isStale: opportunity.isStale, compact: true) }
+            }
+
+            if showReason, let reason {
+                HStack(alignment: .top, spacing: 8) {
+                    Image(systemName: reason.positive ? "sparkles" : "exclamationmark.circle.fill")
+                        .foregroundStyle(reason.positive ? NaviqColor.jade : NaviqColor.amber)
+                    Text(reason.detail)
+                        .foregroundStyle(NaviqColor.ink)
+                        .multilineTextAlignment(.leading)
+                }
+                .font(NaviqFont.meta)
+                .padding(12)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background { RoundedRectangle(cornerRadius: 14, style: .continuous).fill(reason.positive ? NaviqColor.jadeSoft : NaviqColor.amberSoft) }
             }
         }
-        .padding(.vertical, NaviqSpacing.m)
-        .contentShape(Rectangle())
+        .naviqCard()
+        .contentShape(RoundedRectangle(cornerRadius: NaviqSpacing.radius, style: .continuous))
         .accessibilityElement(children: .combine)
         .accessibilityHint("Opens details")
     }
 
-    @ViewBuilder private var metaItems: some View {
-        DeadlineLabel(availability: opportunity.availability, deadline: opportunity.deadline)
-        if let money = opportunity.moneyLine {
-            Label(money, systemImage: "indianrupeesign")
-                .font(NaviqFont.meta)
-                .foregroundStyle(NaviqColor.inkSecondary)
-                .labelStyle(.titleOnly)
-        }
-        VerificationLabel(status: opportunity.verificationStatus, lastVerifiedAt: opportunity.lastVerifiedAt, isStale: opportunity.isStale, compact: true)
+    private func factPill<C: View>(@ViewBuilder _ content: () -> C) -> some View {
+        content()
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
+            .background { Capsule().fill(NaviqColor.surfaceSunken) }
     }
 
     private var reason: MatchFactor? {
