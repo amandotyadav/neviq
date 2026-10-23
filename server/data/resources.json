@@ -1,0 +1,19 @@
+{
+  "_comment": "Learning resources whose URLs returned HTTP 200 on 2026-10-23. Saathi may only cite these by id as 'verified'.",
+  "records": [
+    { "title": "OWASP Top 10", "provider": "OWASP Foundation", "url": "https://owasp.org/www-project-top-ten/", "skills": ["cybersecurity", "web security", "application security"], "cost": "free", "description": "The standard awareness document for the most critical web application security risks." },
+    { "title": "Web Security Academy", "provider": "PortSwigger", "url": "https://portswigger.net/web-security", "skills": ["cybersecurity", "web security", "penetration testing"], "cost": "free", "description": "Free, hands-on labs covering web vulnerabilities." },
+    { "title": "OverTheWire Wargames", "provider": "OverTheWire", "url": "https://overthewire.org/wargames/", "skills": ["cybersecurity", "linux", "ctf"], "cost": "free", "description": "Security concepts taught through progressive wargames, starting with Linux basics (Bandit)." },
+    { "title": "picoCTF", "provider": "Carnegie Mellon University", "url": "https://picoctf.org", "skills": ["cybersecurity", "ctf", "cryptography", "forensics"], "cost": "free", "description": "Capture-the-flag practice and competitions aimed at students." },
+    { "title": "Introduction to Cybersecurity", "provider": "Cisco Networking Academy", "url": "https://www.netacad.com/courses/introduction-to-cybersecurity", "skills": ["cybersecurity", "networking"], "cost": "free", "description": "Introductory online course on cybersecurity fundamentals." },
+    { "title": "NPTEL", "provider": "IITs & IISc (NPTEL)", "url": "https://nptel.ac.in", "skills": ["computer science", "engineering", "programming", "networking", "machine learning"], "cost": "free", "description": "Online courses from IITs and IISc with optional certification exams." },
+    { "title": "SWAYAM", "provider": "Government of India", "url": "https://swayam.gov.in", "skills": ["computer science", "engineering", "programming"], "cost": "free", "description": "Government of India platform for online courses." },
+    { "title": "CS50: Introduction to Computer Science", "provider": "Harvard University", "url": "https://cs50.harvard.edu/x/", "skills": ["programming", "c", "python", "computer science"], "cost": "free", "description": "Introductory computer science course." },
+    { "title": "MIT OpenCourseWare", "provider": "MIT", "url": "https://ocw.mit.edu", "skills": ["computer science", "mathematics", "engineering", "research"], "cost": "free", "description": "Free course materials from MIT." },
+    { "title": "MDN Web Docs", "provider": "Mozilla", "url": "https://developer.mozilla.org/en-US/", "skills": ["web development", "javascript", "html", "css"], "cost": "free", "description": "Reference documentation and guides for web technologies." },
+    { "title": "Pro Git (book)", "provider": "git-scm.com", "url": "https://git-scm.com/book/en/v2", "skills": ["git", "open source"], "cost": "free", "description": "The official free book on Git." },
+    { "title": "The Swift Programming Language", "provider": "Swift.org", "url": "https://docs.swift.org/swift-book/", "skills": ["swift", "ios"], "cost": "free", "description": "The official Swift language guide." },
+    { "title": "freeCodeCamp Curriculum", "provider": "freeCodeCamp", "url": "https://www.freecodecamp.org/learn", "skills": ["web development", "javascript", "python", "programming"], "cost": "free", "description": "Free interactive coding curriculum with certifications." },
+    { "title": "roadmap.sh", "provider": "roadmap.sh", "url": "https://roadmap.sh", "skills": ["programming", "cybersecurity", "web development", "devops"], "cost": "free", "description": "Community-maintained learning roadmaps by role." }
+  ]
+}

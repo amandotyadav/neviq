@@ -1,0 +1,13 @@
+{
+  "_comment": "Curated institutions. Each website returned HTTP 200 when checked on 2026-10-23. Students can add unlisted institutions during onboarding.",
+  "records": [
+    { "name": "KIET Group of Institutions", "shortName": "KIET", "city": "Ghaziabad", "state": "Uttar Pradesh", "website": "https://www.kiet.edu", "aliases": ["kiet ghaziabad"] },
+    { "name": "Indian Institute of Technology Bombay", "shortName": "IIT Bombay", "city": "Mumbai", "state": "Maharashtra", "website": "https://www.iitb.ac.in", "aliases": ["iitb"] },
+    { "name": "Indian Institute of Technology Delhi", "shortName": "IIT Delhi", "city": "New Delhi", "state": "Delhi", "website": "https://home.iitd.ac.in", "aliases": ["iitd"] },
+    { "name": "Delhi Technological University", "shortName": "DTU", "city": "New Delhi", "state": "Delhi", "website": "https://dtu.ac.in", "aliases": ["dce"] },
+    { "name": "National Institute of Technology Tiruchirappalli", "shortName": "NIT Trichy", "city": "Tiruchirappalli", "state": "Tamil Nadu", "website": "https://www.nitt.edu", "aliases": ["nitt"] },
+    { "name": "Vellore Institute of Technology", "shortName": "VIT", "city": "Vellore", "state": "Tamil Nadu", "website": "https://vit.ac.in", "aliases": [] },
+    { "name": "Anna University", "shortName": "Anna Univ", "city": "Chennai", "state": "Tamil Nadu", "website": "https://www.annauniv.edu", "aliases": [] },
+    { "name": "Birla Institute of Technology and Science, Pilani", "shortName": "BITS Pilani", "city": "Pilani", "state": "Rajasthan", "website": "https://www.bits-pilani.ac.in", "aliases": ["bits"] }
+  ]
+}

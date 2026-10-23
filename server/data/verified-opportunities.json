@@ -1,0 +1,542 @@
+{
+  "_comment": "Every record below was checked against the cited official source on the date in lastVerifiedAt. Fields not stated by the source are left null/unknown. Re-verify before each demo cycle (npm run sources:check flags broken links). See docs/SOURCES.md.",
+  "records": [
+    {
+      "title": "Science Academies' Summer Research Fellowship Programme 2027",
+      "organization": "Indian Academy of Sciences, INSA & NASI (Science Academies)",
+      "opportunityType": "research",
+      "officialDescription": "Two-month Summer Fellowships for students and teachers to work with an assigned guide. Selected fellows receive round-trip train fare and a monthly fellowship to meet their living expenses at the place of work. Student applicants upload scanned mark sheets from Class X till the last examination (JPEG, each not exceeding 700 kb) and the contact details of one of their present teachers.",
+      "summary": "A two-month research stint with a scientist guide. For BE/BTech/BCA students, only II and III year students are eligible.",
+      "summarySource": "editor",
+      "sourceUrl": "https://webjapps.ias.ac.in/fellowship2027/application_instructions.jsp",
+      "applicationUrl": "https://webjapps.ias.ac.in/fellowship2027/index.html",
+      "additionalSources": [
+        {
+          "label": "Programme home",
+          "url": "https://webjapps.ias.ac.in/fellowship2027/index.html"
+        }
+      ],
+      "sourceType": "official_org_site",
+      "verificationStatus": "verified",
+      "lastVerifiedAt": "2026-10-23T12:00:00+05:30",
+      "verifiedBy": "naviq-research",
+      "verificationNotes": "Deadline, BE/BTech/BCA year rule, 65% rule and documents quoted from the application instructions page. Benefits quoted from the programme home page. Fellowship amount is not stated on these pages.",
+      "declaredStatus": "open",
+      "applicationOpensAt": null,
+      "deadline": "2026-11-30T23:59:59+05:30",
+      "deadlineNote": "\"The last date for receipt of applications online is 30 November 2026.\"",
+      "eligibleDegrees": [
+        "B.E.",
+        "B.Tech",
+        "BCA"
+      ],
+      "eligibleYears": [
+        2,
+        3
+      ],
+      "eligibleBranches": [],
+      "requiredSkills": [],
+      "preferredSkills": [],
+      "minimumCGPA": null,
+      "location": {
+        "country": "India",
+        "isNationwide": true,
+        "description": "At the assigned guide's institution"
+      },
+      "workMode": "onsite",
+      "award": null,
+      "stipend": {
+        "amount": null,
+        "currency": "INR",
+        "period": "per_month",
+        "description": "Monthly fellowship to meet living expenses at the place of work, plus round-trip train fare. Amount not stated on the official pages."
+      },
+      "duration": "Two months",
+      "eligibilityRules": [
+        {
+          "key": "degree",
+          "kind": "degree_in",
+          "label": "BE / BTech / BCA student (this listing covers that track; other programmes have different year rules on the source)",
+          "mandatory": true,
+          "values": [
+            "B.E.",
+            "B.Tech",
+            "BCA"
+          ],
+          "sourceExcerpt": "BE / BTech / BCA (II and III years only)"
+        },
+        {
+          "key": "year",
+          "kind": "year_in",
+          "label": "II or III year of BE / BTech / BCA",
+          "mandatory": true,
+          "values": [
+            "2",
+            "3"
+          ],
+          "sourceExcerpt": "BE / BTech / BCA (II and III years only)"
+        },
+        {
+          "key": "marks_65",
+          "kind": "self_declared",
+          "label": "Average of 65% or above in core subjects (excluding languages) from Class X to your last completed examination",
+          "mandatory": true,
+          "sourceExcerpt": "The minimum percentage of average marks in core subjects only (i.e. excluding languages) from X std. up to post-graduation (whichever years completed) should be 65% or above for students.",
+          "note": "Naviq does not store your school marks. Calculate this from your mark sheets."
+        },
+        {
+          "key": "teacher_contact",
+          "kind": "self_declared",
+          "label": "Contact details of one present teacher",
+          "mandatory": true,
+          "sourceExcerpt": "Student applicants must upload the contact details of one of their present teachers."
+        }
+      ],
+      "requiredDocuments": [
+        "Mark sheets from Class X till the last examination (JPEG, max 700 kb each)",
+        "Contact details of one present teacher"
+      ],
+      "tags": [
+        "research",
+        "science",
+        "engineering",
+        "fellowship",
+        "summer"
+      ],
+      "externalId": "ias:srfp-2027"
+    },
+    {
+      "title": "AICTE Pragati Scholarship for Girl Students (Technical Degree) 2026-27",
+      "organization": "All India Council for Technical Education (AICTE)",
+      "opportunityType": "scholarship",
+      "officialDescription": "Scheme implemented by AICTE to assist girls pursuing technical education. Rs. 50,000 per annum for every year of study (maximum 4 years for first-year admitted students and maximum 3 years for lateral-entry students), paid as a lump sum towards college fee, computer, stationery, books, equipment, software etc. Applications are made online on the National Scholarship Portal and verified by the host institution and the State/UT Department of Technical Education. Selection is on merit of the qualifying examination.",
+      "summary": "₹50,000 a year for girl students who joined an AICTE-approved degree course this year (or second year via lateral entry), with family income up to ₹8 lakh.",
+      "summarySource": "editor",
+      "sourceUrl": "https://scholarships.gov.in/All-Scholarships",
+      "applicationUrl": "https://scholarships.gov.in/ApplicationForm/",
+      "additionalSources": [
+        {
+          "label": "Scheme guidelines (PDF on NSP)",
+          "url": "https://scholarships.gov.in/public/schemeGuidelines/AICTE/AICTE_2010_G.pdf"
+        },
+        {
+          "label": "AICTE Pragati page",
+          "url": "https://aicte.gov.in/schemes/students-development-schemes/Pragati/General-Instructions"
+        }
+      ],
+      "sourceType": "government_portal",
+      "verificationStatus": "verified",
+      "lastVerifiedAt": "2026-10-23T12:00:00+05:30",
+      "verifiedBy": "naviq-research",
+      "verificationNotes": "Dates from the NSP All Scholarships listing for Academic Year 2026-27 (scheme open 01-06-2026, student application open till 31-10-2026). Eligibility and amount from the degree guideline PDF linked on NSP, which is titled 2020-21; NSP still links it for 2026-27.",
+      "declaredStatus": "open",
+      "applicationOpensAt": "2026-06-01T00:00:00+05:30",
+      "deadline": "2026-10-31T23:59:59+05:30",
+      "deadlineNote": "Student application deadline on NSP. Institute verification is open till 15-11-2026.",
+      "eligibleDegrees": [],
+      "eligibleYears": [
+        1,
+        2
+      ],
+      "eligibleBranches": [],
+      "requiredSkills": [],
+      "preferredSkills": [],
+      "minimumCGPA": null,
+      "location": {
+        "country": "India",
+        "isNationwide": true
+      },
+      "workMode": "not_applicable",
+      "award": {
+        "amount": 50000,
+        "currency": "INR",
+        "period": "per_year",
+        "description": "Rs. 50,000 per annum for every year of study (max 4 years; 3 years for lateral entry)."
+      },
+      "stipend": null,
+      "eligibilityRules": [
+        {
+          "key": "girl_student",
+          "kind": "self_declared",
+          "label": "Applicant is a girl student",
+          "mandatory": true,
+          "sourceExcerpt": "The girl candidate should be admitted to First year of Degree level course OR Second year of Degree level course through lateral entry",
+          "note": "Naviq does not collect or infer gender. Confirm this yourself.",
+          "restrictsAudience": true
+        },
+        {
+          "key": "year",
+          "kind": "year_in",
+          "label": "Currently in year 1 or 2 of a degree course",
+          "mandatory": true,
+          "values": [
+            "1",
+            "2"
+          ],
+          "sourceExcerpt": "admitted to First year of Degree level course OR Second year of Degree level course through lateral entry in any of the AICTE approved Institution of respective year."
+        },
+        {
+          "key": "lateral_entry",
+          "kind": "self_declared",
+          "label": "Admitted to first year, or to second year through lateral entry (regular second-year students are not eligible)",
+          "mandatory": true,
+          "note": "First-year students: answer Yes. Second-year students qualify only if they joined through lateral entry.",
+          "sourceExcerpt": "admitted to First year of Degree level course OR Second year of Degree level course through lateral entry"
+        },
+        {
+          "key": "aicte_approved",
+          "kind": "self_declared",
+          "label": "Your institution is AICTE-approved",
+          "mandatory": true,
+          "sourceExcerpt": "in any of the AICTE approved Institution"
+        },
+        {
+          "key": "income",
+          "kind": "max_family_income",
+          "label": "Family income from all sources not more than ₹8 lakh per annum",
+          "mandatory": true,
+          "numberValue": 800000,
+          "sourceExcerpt": "Family income from all sources should not be more than Rs. 8 lakh per annum during the current financial year."
+        },
+        {
+          "key": "two_per_family",
+          "kind": "self_declared",
+          "label": "No more than two girl children per family receive it",
+          "mandatory": true,
+          "sourceExcerpt": "Maximum two girl child per family are eligible."
+        }
+      ],
+      "requiredDocuments": [
+        "Valid income certificate issued by the State/UT Government"
+      ],
+      "tags": [
+        "scholarship",
+        "women in tech",
+        "engineering",
+        "aicte",
+        "technical education"
+      ],
+      "externalId": "nsp:aicte-pragati-scholarship-scheme-for-girl-students-technical-degree"
+    },
+    {
+      "title": "AICTE Saksham Scholarship for Specially-Abled Students (Technical Degree) 2026-27",
+      "organization": "All India Council for Technical Education (AICTE)",
+      "opportunityType": "scholarship",
+      "officialDescription": "Scheme implemented by AICTE to support specially-abled students pursuing technical education. All eligible students get the scholarship. Rs. 50,000 per annum for every year of study (maximum 4 years for first-year admitted students and maximum 3 years for lateral-entry students), as a lump sum towards college fee, computer, stationery, books, equipment, software etc. Apply online on the National Scholarship Portal.",
+      "summary": "₹50,000 a year for students with a disability of 40% or more who joined an AICTE-approved degree course, with family income up to ₹8 lakh.",
+      "summarySource": "editor",
+      "sourceUrl": "https://scholarships.gov.in/All-Scholarships",
+      "applicationUrl": "https://scholarships.gov.in/ApplicationForm/",
+      "additionalSources": [
+        {
+          "label": "Scheme guidelines (PDF on NSP)",
+          "url": "https://scholarships.gov.in/public/schemeGuidelines/AICTE/AICTE_2012_G.pdf"
+        }
+      ],
+      "sourceType": "government_portal",
+      "verificationStatus": "verified",
+      "lastVerifiedAt": "2026-10-23T12:00:00+05:30",
+      "verifiedBy": "naviq-research",
+      "verificationNotes": "Dates from the NSP All Scholarships listing for Academic Year 2026-27. Eligibility and amount from the degree guideline PDF linked on NSP (titled 2020-21).",
+      "declaredStatus": "open",
+      "applicationOpensAt": "2026-06-01T00:00:00+05:30",
+      "deadline": "2026-10-31T23:59:59+05:30",
+      "deadlineNote": "Student application deadline on NSP. Institute verification is open till 15-11-2026.",
+      "eligibleDegrees": [],
+      "eligibleYears": [
+        1,
+        2
+      ],
+      "eligibleBranches": [],
+      "requiredSkills": [],
+      "preferredSkills": [],
+      "minimumCGPA": null,
+      "location": {
+        "country": "India",
+        "isNationwide": true
+      },
+      "workMode": "not_applicable",
+      "award": {
+        "amount": 50000,
+        "currency": "INR",
+        "period": "per_year",
+        "description": "Rs. 50,000 per annum for every year of study (max 4 years; 3 years for lateral entry)."
+      },
+      "stipend": null,
+      "eligibilityRules": [
+        {
+          "key": "disability_40",
+          "kind": "self_declared",
+          "label": "Disability of not less than 40%",
+          "mandatory": true,
+          "sourceExcerpt": "Specially-abled student, having disability of not less than 40%.",
+          "note": "Naviq does not collect or infer disability information. Confirm this yourself.",
+          "restrictsAudience": true
+        },
+        {
+          "key": "year",
+          "kind": "year_in",
+          "label": "Currently in year 1 or 2 of a degree course",
+          "mandatory": true,
+          "values": [
+            "1",
+            "2"
+          ],
+          "sourceExcerpt": "The candidate should be admitted to First year of Degree level course OR Second year of Degree level course through lateral entry"
+        },
+        {
+          "key": "lateral_entry",
+          "kind": "self_declared",
+          "label": "If you are in second year, you joined through lateral entry",
+          "mandatory": false
+        },
+        {
+          "key": "aicte_approved",
+          "kind": "self_declared",
+          "label": "Your institution is AICTE-approved",
+          "mandatory": true
+        },
+        {
+          "key": "income",
+          "kind": "max_family_income",
+          "label": "Family income from all sources not more than ₹8 lakh per annum",
+          "mandatory": true,
+          "numberValue": 800000,
+          "sourceExcerpt": "Family income from all sources should not be more than Rs. 8 lakh per annum during the current financial year."
+        }
+      ],
+      "requiredDocuments": [
+        "Valid income certificate issued by the State/UT Government"
+      ],
+      "tags": [
+        "scholarship",
+        "accessibility",
+        "engineering",
+        "aicte",
+        "technical education"
+      ],
+      "externalId": "nsp:aicte-saksham-scholarship-scheme-for-specially-abled-student-technical-degree"
+    },
+    {
+      "title": "PM-USP Central Sector Scheme of Scholarship (CSSS) 2026-27 — Renewal",
+      "organization": "Department of Higher Education, Ministry of Education",
+      "opportunityType": "scholarship",
+      "officialDescription": "Financial assistance to meritorious students from poor families to meet part of their day-to-day expenses during higher studies, awarded on the basis of Class XII results. Rate: ₹12,000 per annum at graduation level for the first three years; B.Tech/B.Engg students get ₹12,000 p.a. for 1st–3rd year and ₹20,000 in the 4th year. Renewal each year requires at least 50% marks in the annual examination and at least 75% attendance. Students with gross parental/family income up to ₹4.5 lakh per annum are eligible.",
+      "summary": "Renewal window for students who already hold the CSSS scholarship. NSP listed renewals (not fresh applications) for 2026-27 when Naviq checked.",
+      "summarySource": "editor",
+      "sourceUrl": "https://scholarships.gov.in/All-Scholarships",
+      "applicationUrl": "https://scholarships.gov.in/ApplicationForm/",
+      "additionalSources": [
+        {
+          "label": "Scheme guidelines (PDF on NSP)",
+          "url": "https://scholarships.gov.in/public/schemeGuidelines/CSSS_GUIDLINES_07022024_updated.pdf"
+        }
+      ],
+      "sourceType": "government_portal",
+      "verificationStatus": "verified",
+      "lastVerifiedAt": "2026-10-23T12:00:00+05:30",
+      "verifiedBy": "naviq-research",
+      "verificationNotes": "NSP lists this scheme with Renewal dates for AY 2026-27 (scheme open 01-06-2026, student application open till 31-10-2026). Rates and rules from the guideline PDF (applicable from 2022-23).",
+      "declaredStatus": "open",
+      "applicationOpensAt": "2026-06-01T00:00:00+05:30",
+      "deadline": "2026-10-31T23:59:59+05:30",
+      "deadlineNote": "Renewal application deadline on NSP. Institute verification is open till 15-11-2026.",
+      "eligibleDegrees": [],
+      "eligibleYears": [],
+      "eligibleBranches": [],
+      "requiredSkills": [],
+      "preferredSkills": [],
+      "minimumCGPA": null,
+      "location": {
+        "country": "India",
+        "isNationwide": true
+      },
+      "workMode": "not_applicable",
+      "award": {
+        "amount": 12000,
+        "currency": "INR",
+        "period": "per_year",
+        "description": "₹12,000 p.a. for 1st–3rd year; ₹20,000 in the 4th year for B.Tech/B.Engg."
+      },
+      "stipend": null,
+      "eligibilityRules": [
+        {
+          "key": "existing_awardee",
+          "kind": "self_declared",
+          "label": "You already receive the CSSS scholarship (this is a renewal)",
+          "mandatory": true,
+          "note": "Only renewal applications were listed on NSP for 2026-27 when verified.",
+          "restrictsAudience": true
+        },
+        {
+          "key": "renewal_marks",
+          "kind": "self_declared",
+          "label": "At least 50% marks in your last annual examination",
+          "mandatory": true,
+          "sourceExcerpt": "For renewal of scholarship in each year of study, besides getting at least 50% marks in the Annual Examination, maintenance of adequate attendance of at least 75%, will also be the criteria."
+        },
+        {
+          "key": "attendance",
+          "kind": "self_declared",
+          "label": "Attendance of at least 75%",
+          "mandatory": true,
+          "sourceExcerpt": "maintenance of adequate attendance of at least 75%"
+        },
+        {
+          "key": "regular_course",
+          "kind": "self_declared",
+          "label": "Regular degree course (not correspondence, distance, or diploma)",
+          "mandatory": true,
+          "sourceExcerpt": "Pursuing regular degree courses and not correspondence or distance mode or pursuing Diploma courses"
+        },
+        {
+          "key": "income",
+          "kind": "max_family_income",
+          "label": "Gross parental/family income up to ₹4.5 lakh per annum",
+          "mandatory": true,
+          "numberValue": 450000,
+          "sourceExcerpt": "Students with gross parental/family income upto ₹ 4.5 lakh per annum are eligible for scholarship under the scheme."
+        },
+        {
+          "key": "no_other_scholarship",
+          "kind": "self_declared",
+          "label": "Not availing any other merit/state scholarship, fee waiver, or reimbursement",
+          "mandatory": true,
+          "sourceExcerpt": "Not availing benefit of any other merit scholarship schemes, State run scholarship schemes, fee waiver, reimbursement scheme."
+        }
+      ],
+      "requiredDocuments": [],
+      "tags": [
+        "scholarship",
+        "merit",
+        "renewal",
+        "ministry of education"
+      ],
+      "externalId": "nsp:pm-usp-central-sector-scheme-of-scholarship-for-college-and-university-students-csss"
+    },
+    {
+      "title": "Smart India Hackathon 2026 (Senior)",
+      "organization": "Smart India Hackathon, Government of India",
+      "opportunityType": "hackathon",
+      "officialDescription": "National hackathon for Higher Education Institution (HEI) students in the SIH Senior category. The official site states the Team Nomination & Idea Submission deadline was extended to 09 Oct 2026.",
+      "summary": "Team nominations for SIH 2026 have closed. Save it to watch for the next edition.",
+      "summarySource": "editor",
+      "sourceUrl": "https://www.sih.gov.in/",
+      "applicationUrl": "https://www.sih.gov.in/",
+      "additionalSources": [],
+      "sourceType": "government_portal",
+      "verificationStatus": "verified",
+      "lastVerifiedAt": "2026-10-23T12:00:00+05:30",
+      "verifiedBy": "naviq-research",
+      "verificationNotes": "Deadline quoted from the SIH home page. Team size and prize details were not visible and are left unknown.",
+      "declaredStatus": "closed",
+      "applicationOpensAt": null,
+      "deadline": "2026-10-09T23:59:59+05:30",
+      "deadlineNote": "\"Team Nomination & Idea Submission deadline extended to 09 Oct 2026\"",
+      "eligibleDegrees": [],
+      "eligibleYears": [],
+      "eligibleBranches": [],
+      "requiredSkills": [],
+      "preferredSkills": [],
+      "minimumCGPA": null,
+      "location": {
+        "country": "India",
+        "isNationwide": true
+      },
+      "workMode": "unknown",
+      "award": null,
+      "stipend": null,
+      "eligibilityRules": [
+        {
+          "key": "hei_student",
+          "kind": "self_declared",
+          "label": "Student of a Higher Education Institution (SIH Senior)",
+          "mandatory": true
+        }
+      ],
+      "requiredDocuments": [],
+      "tags": [
+        "hackathon",
+        "competition",
+        "innovation",
+        "government"
+      ]
+    },
+    {
+      "title": "Google Summer of Code (next edition)",
+      "organization": "Google",
+      "opportunityType": "program",
+      "officialDescription": "A global, online program focused on bringing new contributors into open source software development, with 12+ week programming projects. Projects are scoped for ~90 hours (Small), ~175 hours (Medium), or ~350 hours (Large). Google provides a stipend for participants who pass their evaluations and are eligible to receive stipends.",
+      "summary": "Mentored open-source work with a stipend. The next edition's dates are not published yet.",
+      "summarySource": "editor",
+      "sourceUrl": "https://developers.google.com/open-source/gsoc/faq",
+      "applicationUrl": "https://summerofcode.withgoogle.com/",
+      "additionalSources": [
+        {
+          "label": "Programme timeline",
+          "url": "https://developers.google.com/open-source/gsoc/timeline"
+        }
+      ],
+      "sourceType": "official_org_site",
+      "verificationStatus": "verified",
+      "lastVerifiedAt": "2026-10-23T12:00:00+05:30",
+      "verifiedBy": "naviq-research",
+      "verificationNotes": "The official timeline currently shows GSoC 2026 (contributor applications closed 31 March 2026). No 2027 dates were published when checked, so availability is unknown.",
+      "declaredStatus": "unknown",
+      "applicationOpensAt": null,
+      "deadline": null,
+      "deadlineNote": "2027 timeline not yet published on the official site.",
+      "eligibleDegrees": [],
+      "eligibleYears": [],
+      "eligibleBranches": [],
+      "requiredSkills": [],
+      "preferredSkills": [],
+      "minimumCGPA": null,
+      "location": {
+        "country": "Global",
+        "isNationwide": true,
+        "description": "Online"
+      },
+      "workMode": "remote",
+      "award": null,
+      "stipend": {
+        "amount": null,
+        "currency": "USD",
+        "period": null,
+        "description": "Stipend for participants who pass evaluations; amount not stated on the FAQ section checked."
+      },
+      "duration": "12+ weeks (~90, ~175 or ~350 hours)",
+      "eligibilityRules": [
+        {
+          "key": "age_18",
+          "kind": "self_declared",
+          "label": "18 or older at registration",
+          "mandatory": true,
+          "sourceExcerpt": "18+ years old at registration"
+        },
+        {
+          "key": "student_or_beginner",
+          "kind": "self_declared",
+          "label": "Student or open source beginner",
+          "mandatory": true,
+          "sourceExcerpt": "Student or Open source beginner"
+        },
+        {
+          "key": "work_eligible",
+          "kind": "self_declared",
+          "label": "Eligible to work in your country of residence",
+          "mandatory": true,
+          "sourceExcerpt": "Eligible to work in your country of residence"
+        }
+      ],
+      "requiredDocuments": [],
+      "tags": [
+        "open source",
+        "programming",
+        "mentorship",
+        "remote",
+        "software"
+      ]
+    }
+  ]
+}

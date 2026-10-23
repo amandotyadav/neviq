@@ -1,0 +1,23 @@
+# Secrets and local config
+.env
+.env.*
+!.env.example
+
+# Dependencies and generated data
+node_modules/
+.data/
+coverage/
+ingest/.venv/
+ingest/cache/
+ingest/out/
+ingest/nsp.html
+ingest/aicte.html
+ingest/p.html
+__pycache__/
+
+# Xcode / macOS
+xcuserdata/
+*.xcuserstate
+DerivedData/
+build/
+.DS_Store
